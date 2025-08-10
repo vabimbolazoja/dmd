@@ -13,10 +13,6 @@ export function useAuth() {
 
       const res = await fetch("https://4mserve.vercel.app/api/auth/user", {
         method: "GET",
-        headers: {
-          "Content-Type": "application/json",
-          ...(token && { Authorization: `Bearer ${token}` }), // Add header only if token exists
-        },
         credentials: "include", // optional if you still want cookies sent
       });
 
