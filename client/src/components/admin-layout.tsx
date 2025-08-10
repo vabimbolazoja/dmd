@@ -19,8 +19,8 @@ import {
   Menu,
   X,
   Truck,
-  Cookie,
 } from "lucide-react";
+import Cookie from 'js-cookie'
 import { cn } from "@/lib/utils";
 import Logo from "../img/logoSvg.svg"
 const navigation = [
