@@ -1,0 +1,1 @@
+export const base_url = 'https://4mserve.vercel.app'
