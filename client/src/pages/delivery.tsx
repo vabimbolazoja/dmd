@@ -60,6 +60,7 @@ export default function Products() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [order, setOrder] = useState(null);
+  const [prodId,setProdId] = useState("")
 
   const [formData, setFormData] = useState({
     name: "",
@@ -191,7 +192,7 @@ export default function Products() {
 
   const updateMutation = useMutation({
     mutationFn: ({ id, data }: { id: string; data: Partial<typeof formData> }) =>
-      apiRequest("PUT", `${base_url}/api/admin/orders-delivery-address/${id}`, data),
+      apiRequest("PUT", `${base_url}/api/admin/orders-delivery-address/${prodId}`, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: [base_url + "/api/admin/orders-delivery"] });
       setEditingProduct(null);
@@ -267,6 +268,7 @@ export default function Products() {
 
   const handleSubmit = (e: React.FormEvent, id?: string) => {
     e.preventDefault();
+    console.log(id)
     if (id) {
       updateMutation.mutate({ id, data: formData });
     } 
@@ -356,7 +358,10 @@ export default function Products() {
 
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
+                          <Dialog open={isAddDialogOpen} onOpenChange={() => {
+                            setProdId(product?._id)
+                            setIsAddDialogOpen(!isAddDialogOpen)
+                          }}>
                             <DialogTrigger asChild>
                             <Button
                             variant="outline"
@@ -425,7 +430,7 @@ export default function Products() {
                                 </div>
                               
                                 <DialogFooter>
-                                  <Button type="submit" disabled={createMutation.isPending}>
+                                  <Button type="submit" disabled={updateMutation.isPending}>
                                     {updateMutation.isPending ? "Submitting..." : "Submit"}
                                   </Button>
                                 </DialogFooter>
