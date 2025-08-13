@@ -465,7 +465,7 @@ export default function Products() {
                       <TableCell>{product.category?.name}</TableCell>
                       <TableCell>N{product.priceNaira}</TableCell>
                       <TableCell>${product.priceUsd}</TableCell>
-                      <TableCell>${product.stock}</TableCell>
+                      <TableCell>{product.stock ? product?.stock : 0}</TableCell>
                       <TableCell>{product.moq}</TableCell>
                       <TableCell>
                         <Badge variant={product.status === 'Active' ? "default" : "secondary"}>
