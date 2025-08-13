@@ -65,6 +65,7 @@ export default function Products() {
     priceNaira: "",
     category: "",
     status:false,
+    stock:"",
     moq: 0,
     nutritionalInfo:"",
     storageInstructions:"",
@@ -77,8 +78,8 @@ export default function Products() {
       description: "",
       price: "",
       category: "",
-      stock: 0,
       imageUrls: "",
+      stock:"",
       status:false,
       nutritionalInfo:"",
       storageInstructions:"",
@@ -261,6 +262,7 @@ export default function Products() {
       priceUsd: product.priceUsd,
       priceNaira: product?.priceNaira,
       nutritionalInfo:product?.nutritionalInfo,
+      stock:product?.stock,
       storageInstructions:product?.storageInstructions,
       category: product.category?._id,
       moq: product.moq,
@@ -389,6 +391,14 @@ export default function Products() {
                   </div>
                 </div>
                 <div>
+                  <Label htmlFor="category">Stock</Label>
+                  <Input
+                    id="moq"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  />
+                </div>
+                <div>
                   <Label htmlFor="category">MOQ</Label>
                   <Input
                     id="moq"
@@ -431,6 +441,7 @@ export default function Products() {
                     <TableHead>Category</TableHead>
                     <TableHead>Price(N)</TableHead>
                     <TableHead>Price($)</TableHead>
+                    <TableHead>Stock</TableHead>
                     <TableHead>Moq</TableHead>
                     <TableHead>Status</TableHead>
                     <TableHead>Actions</TableHead>
@@ -454,6 +465,7 @@ export default function Products() {
                       <TableCell>{product.category?.name}</TableCell>
                       <TableCell>N{product.priceNaira}</TableCell>
                       <TableCell>${product.priceUsd}</TableCell>
+                      <TableCell>${product.stock}</TableCell>
                       <TableCell>{product.moq}</TableCell>
                       <TableCell>
                         <Badge variant={product.status === 'Active' ? "default" : "secondary"}>
@@ -578,6 +590,22 @@ export default function Products() {
                   </SelectContent>
                 </Select>
               </div>
+              <div>
+                  <Label htmlFor="category">Stock</Label>
+                  <Input
+                    id="moq"
+                    value={formData.stock}
+                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="category">MOQ</Label>
+                  <Input
+                    id="moq"
+                    value={formData.moq}
+                    onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
+                  />
+                </div>
               <div>
                 <Label htmlFor="imageUrl">Uploaded Image URL</Label>
                 <MultiUpload onUploadComplete={handleUploadComplete} />
