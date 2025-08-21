@@ -242,11 +242,6 @@ export default function Products() {
       setPage(currentPage)
   }, [currentPage])
 
-  useEffect(() => {
-      window.scrollTo(0, 0);
-  }, [page]);
-
-
 
   function itemRender(current, type, originalElement) {
       if (type === "prev") {
