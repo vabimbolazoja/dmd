@@ -11,6 +11,7 @@ import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Pagination } from "antd";
 import { Badge } from "@/components/ui/badge";
 import { base_url } from "../config";
 import { Switch } from 'antd'
@@ -55,7 +56,9 @@ export default function Products() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-  const [imageUrlView,setImageurlView] = useState("")
+   const [page, setPage] = useState(1)
+    const [limit, setLimit] = useState(10)
+  const [imageUrlView, setImageurlView] = useState("")
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
@@ -64,11 +67,11 @@ export default function Products() {
     priceUsd: "",
     priceNaira: "",
     category: "",
-    status:false,
-    stock:"",
+    status: false,
+    stock: "",
     moq: 0,
-    nutritionalInfo:"",
-    storageInstructions:"",
+    nutritionalInfo: "",
+    storageInstructions: "",
     imageUrls: [],
   });
 
@@ -79,10 +82,10 @@ export default function Products() {
       price: "",
       category: "",
       imageUrls: "",
-      stock:"",
-      status:false,
-      nutritionalInfo:"",
-      storageInstructions:"",
+      stock: "",
+      status: false,
+      nutritionalInfo: "",
+      storageInstructions: "",
     });
   };
 
@@ -102,8 +105,8 @@ export default function Products() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: products, isLoading: productsLoading, error } = useQuery<Product[]>({
-    queryKey: [base_url + "/api/products"],
+  const { data, isLoading: productsLoading, error, refetch } = useQuery<Product[]>({
+    queryKey: [base_url + `/api/products?page=${page}&limit=${limit}`],
     retry: false,
   });
 
@@ -230,9 +233,45 @@ export default function Products() {
     },
   });
 
+  const products = data?.products || [];
+  const totalPages = data?.pages * 10 || 10;
+  const currentPage = data?.page || 1;
+
+
+  useEffect(() => {
+      setPage(currentPage)
+  }, [currentPage])
+
+  useEffect(() => {
+      window.scrollTo(0, 0);
+  }, [page]);
+
+
+
+  function itemRender(current, type, originalElement) {
+      if (type === "prev") {
+          return <a>Previous</a>;
+      }
+      if (type === "next") {
+          return <a>Next</a>;
+      }
+      return originalElement;
+  }
+
+  const pagination = (page, pageSize) => {
+      setPage(page);
+      setLimit(pageSize)
+
+  };
+
+  useEffect(() => {
+      refetch();
+
+  }, [limit, page]);
+
 
   const switchChange = (val) => {
-    setFormData({ ...formData, status: val})
+    setFormData({ ...formData, status: val })
 
   }
 
@@ -261,12 +300,12 @@ export default function Products() {
       description: product.description,
       priceUsd: product.priceUsd,
       priceNaira: product?.priceNaira,
-      nutritionalInfo:product?.nutritionalInfo,
-      stock:product?.stock,
-      storageInstructions:product?.storageInstructions,
+      nutritionalInfo: product?.nutritionalInfo,
+      stock: product?.stock,
+      storageInstructions: product?.storageInstructions,
       category: product.category?._id,
       moq: product.moq,
-      status:product?.status === 'Active' ? true : false ,
+      status: product?.status === 'Active' ? true : false,
       imageUrls: product?.imageUrls
     });
   };
@@ -306,7 +345,7 @@ export default function Products() {
               </Button>
             </DialogTrigger>
             <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
-            <DialogHeader>
+              <DialogHeader>
                 <DialogTitle>Add New Product</DialogTitle>
                 <DialogDescription>
                   Create a new product for your store.
@@ -331,21 +370,21 @@ export default function Products() {
                   />
                 </div>
                 <div>
-                <Label htmlFor="edit-description">Nutritional Information</Label>
-                <Textarea
-                  id="edit-description"
-                  value={formData.nutritionalInfo}
-                  onChange={(e) => setFormData({ ...formData, nutritionalInfo: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-description">Storage Instruction</Label>
-                <Textarea
-                  id="edit-description"
-                  value={formData.storageInstructions}
-                  onChange={(e) => setFormData({ ...formData, storageInstructions: e.target.value })}
-                />
-              </div>
+                  <Label htmlFor="edit-description">Nutritional Information</Label>
+                  <Textarea
+                    id="edit-description"
+                    value={formData.nutritionalInfo}
+                    onChange={(e) => setFormData({ ...formData, nutritionalInfo: e.target.value })}
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="edit-description">Storage Instruction</Label>
+                  <Textarea
+                    id="edit-description"
+                    value={formData.storageInstructions}
+                    onChange={(e) => setFormData({ ...formData, storageInstructions: e.target.value })}
+                  />
+                </div>
 
                 <div className="grid grid-cols-2 gap-4">
                   <div>
@@ -433,7 +472,7 @@ export default function Products() {
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
-            ) : products?.products?.length > 0 ? (
+            ) : products?.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -448,7 +487,7 @@ export default function Products() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products?.products?.map((product: Product) => (
+                  {products?.map((product: Product) => (
                     <TableRow key={product.id}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
@@ -495,152 +534,161 @@ export default function Products() {
                     </TableRow>
                   ))}
                 </TableBody>
+                <br />
+                <div className="d-flex  justify-content-center align-items-center pt-5 pb-5" style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Pagination
+                    current={page}
+                    total={totalPages}
+                    onChange={pagination}
+                    itemRender={itemRender}
+                  />{" "}
+                </div>
               </Table>
-            ) : (
-              <div className="text-center py-8 text-gray-500">
-                <Package className="mx-auto mb-4" size={48} />
-                <p>No products found</p>
-                <p className="text-sm">Add your first product to get started</p>
-              </div>
+          ) : (
+          <div className="text-center py-8 text-gray-500">
+            <Package className="mx-auto mb-4" size={48} />
+            <p>No products found</p>
+            <p className="text-sm">Add your first product to get started</p>
+          </div>
             )}
-          </CardContent>
-        </Card>
+        </CardContent>
+      </Card>
 
-        {/* Edit Dialog */}
-        <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
+      {/* Edit Dialog */}
+      <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
         <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
-        <DialogHeader>
-              <DialogTitle>Edit Product</DialogTitle>
-              <DialogDescription>
-                Update product information.
-              </DialogDescription>
-            </DialogHeader>
-            <form onSubmit={handleSubmit} className="space-y-4">
+          <DialogHeader>
+            <DialogTitle>Edit Product</DialogTitle>
+            <DialogDescription>
+              Update product information.
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="edit-name">Name</Label>
+              <Input
+                id="edit-name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                required
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Description</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Nutritional Information</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.nutritionalInfo}
+                onChange={(e) => setFormData({ ...formData, nutritionalInfo: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="edit-description">Storage Instruction</Label>
+              <Textarea
+                id="edit-description"
+                value={formData.storageInstructions}
+                onChange={(e) => setFormData({ ...formData, storageInstructions: e.target.value })}
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
               <div>
-                <Label htmlFor="edit-name">Name</Label>
+                <Label htmlFor="price">Price in USD</Label>
                 <Input
-                  id="edit-name"
-                  value={formData.name}
-                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  id="priceUsd"
+                  type="number"
+                  value={formData.priceUsd}
+                  onChange={(e) => setFormData({ ...formData, priceUsd: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="edit-description">Description</Label>
-                <Textarea
-                  id="edit-description"
-                  value={formData.description}
-                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-description">Nutritional Information</Label>
-                <Textarea
-                  id="edit-description"
-                  value={formData.nutritionalInfo}
-                  onChange={(e) => setFormData({ ...formData, nutritionalInfo: e.target.value })}
-                />
-              </div>
-              <div>
-                <Label htmlFor="edit-description">Storage Instruction</Label>
-                <Textarea
-                  id="edit-description"
-                  value={formData.storageInstructions}
-                  onChange={(e) => setFormData({ ...formData, storageInstructions: e.target.value })}
-                />
-              </div>
-              <div className="grid grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="price">Price in USD</Label>
-                  <Input
-                    id="priceUsd"
-                    type="number"
-                    value={formData.priceUsd}
-                    onChange={(e) => setFormData({ ...formData, priceUsd: e.target.value })}
-                    required
-                  />
-                </div>
-                <div>
-                  <Label htmlFor="stock">Price in Naira</Label>
-                  <Input
-                    id="priceNaira"
-                    type="number"
-                    value={formData.priceNaira}
-                    onChange={(e) => setFormData({ ...formData, priceNaira: parseInt(e.target.value) })}
-                    required
-                  />
-                </div>
-              </div>
-              <div>
-                <Label htmlFor="carrier">Category</Label>
-                <Select
-                  value={formData.category}
-                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                <Label htmlFor="stock">Price in Naira</Label>
+                <Input
+                  id="priceNaira"
+                  type="number"
+                  value={formData.priceNaira}
+                  onChange={(e) => setFormData({ ...formData, priceNaira: parseInt(e.target.value) })}
                   required
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a category" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    {categories?.map((carrier) => (
-                      <SelectItem key={carrier._id} value={carrier._id}>
-                        {carrier.name}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
+                />
               </div>
-              <div>
-                  <Label htmlFor="category">Stock</Label>
-                  <Input
-                    id="moq"
-                    value={formData.stock}
-                    onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-                  />
+            </div>
+            <div>
+              <Label htmlFor="carrier">Category</Label>
+              <Select
+                value={formData.category}
+                onValueChange={(value) => setFormData({ ...formData, category: value })}
+                required
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Select a category" />
+                </SelectTrigger>
+                <SelectContent>
+                  {categories?.map((carrier) => (
+                    <SelectItem key={carrier._id} value={carrier._id}>
+                      {carrier.name}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <Label htmlFor="category">Stock</Label>
+              <Input
+                id="moq"
+                value={formData.stock}
+                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="category">MOQ</Label>
+              <Input
+                id="moq"
+                value={formData.moq}
+                onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
+              />
+            </div>
+            <div>
+              <Label htmlFor="imageUrl">Uploaded Image URL</Label>
+              <MultiUpload onUploadComplete={handleUploadComplete} />
+              {imageUrlView.length > 0 && (
+                <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+                  {imageUrlView.map((img, index) => (
+                    <img
+                      key={index}
+                      src={img}
+                      alt={`preview-${index}`}
+                      width={100}
+                      style={{ objectFit: "cover", borderRadius: 6 }}
+                    />
+                  ))}
                 </div>
-                <div>
-                  <Label htmlFor="category">MOQ</Label>
-                  <Input
-                    id="moq"
-                    value={formData.moq}
-                    onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
-                  />
-                </div>
+              )}
+            </div>
+            <div>
               <div>
-                <Label htmlFor="imageUrl">Uploaded Image URL</Label>
-                <MultiUpload onUploadComplete={handleUploadComplete} />
-                {imageUrlView.length > 0 && (
-                  <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
-                    {imageUrlView.map((img, index) => (
-                      <img
-                        key={index}
-                        src={img}
-                        alt={`preview-${index}`}
-                        width={100}
-                        style={{ objectFit: "cover", borderRadius: 6 }}
-                      />
-                    ))}
-                  </div>
-                )}
-              </div>
-              <div>
-                <div>
                 <Label htmlFor="imageUrl">Product Status</Label>
-                </div>
-                <div>
-                <Switch size="small" value={formData?.status} onChange={switchChange} />
-                </div>
-
               </div>
-              <DialogFooter>
-                <Button type="submit" disabled={updateMutation.isPending}>
-                  {updateMutation.isPending ? "Updating..." : "Update Product"}
-                </Button>
-              </DialogFooter>
-            </form>
-          </DialogContent>
-        </Dialog>
-      </div>
-    </AdminLayout>
+              <div>
+                <Switch size="small" value={formData?.status} onChange={switchChange} />
+              </div>
+
+            </div>
+            <DialogFooter>
+              <Button type="submit" disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? "Updating..." : "Update Product"}
+              </Button>
+            </DialogFooter>
+          </form>
+        </DialogContent>
+      </Dialog>
+    </div>
+    </AdminLayout >
   );
 }
