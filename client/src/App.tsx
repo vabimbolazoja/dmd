@@ -15,6 +15,7 @@ import Delivery from "./pages/delivery";
 import Customers from "./pages/customers";
 import Checkout from "./pages/checkout";
 import Categories from "./pages/categories";
+import Moderations from "./pages/moderation";
 
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
@@ -34,6 +35,7 @@ function Router() {
                 <Route path="/login" component={Login} />
 
           <Route path="/" component={Orders} />
+          <Route path="/moderation" component={Moderations} />
           <Route path="/products" component={Products} />
           <Route path="/orders" component={Orders} />
           <Route path="/delivery" component={Delivery} />

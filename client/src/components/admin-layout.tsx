@@ -29,7 +29,8 @@ const navigation = [
   { name: "Customers", href: "/customers", icon: Users },
   { name: "Orders", href: "/orders", icon: ShoppingBag },
   { name: "Delivery", href: "/delivery", icon: Truck },
-  
+  { name: "Moderation", href: "/moderation", icon: Truck },
+
 ];
 
 interface AdminLayoutProps {
@@ -40,7 +41,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
   const [location] = useLocation();
   const { user } = useAuth();
   const [sidebarOpen, setSidebarOpen] = useState(false);
-  
+
   const typedUser = user as User | undefined;
 
   const handleLogout = () => {
@@ -68,15 +69,15 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
 
         {/* Logo Section */}
         <div className="p-6 border-b border-gray-200">
-          <div className="" style={{display:'flex',justifyContent:'center',alignItems:'center'}}>
-          <div>
+          <div className="" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center' }}>
+            <div>
               <h1 className="text-xl font-bold text-gray-900">
                 <img src={Logo} />
               </h1>
               <p className="text-sm text-gray-500">Admin Dashboard</p>
             </div>
           </div>
-          
+
         </div>
 
         {/* Navigation Menu */}
@@ -113,7 +114,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
             </Avatar>
             <div className="flex-1">
               <p className="text-sm font-medium text-gray-900">
-                {typedUser?.firstName && typedUser?.lastName 
+                {typedUser?.firstName && typedUser?.lastName
                   ? `${typedUser.firstName} ${typedUser.lastName}`
                   : 'Admin User'
                 }
@@ -159,7 +160,7 @@ export default function AdminLayout({ children }: AdminLayoutProps) {
               </Button>
             </div>
             <div className="flex items-center space-x-4">
-              
+
               <div className="relative">
                 <Button variant="ghost" size="sm" className="text-gray-400 hover:text-gray-600 p-2">
                   <Bell className="h-5 w-5" />
