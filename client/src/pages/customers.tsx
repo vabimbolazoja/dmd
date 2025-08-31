@@ -133,7 +133,8 @@ export default function Products() {
   const currentPage = data?.page || 1;
 
 
-  console.log(data)
+  console.log(customers)
+  console.log('datas')
   useEffect(() => {
       setPage(currentPage)
   }, [currentPage])
