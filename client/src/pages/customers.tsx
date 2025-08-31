@@ -57,6 +57,8 @@ export default function Products() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -100,8 +102,8 @@ export default function Products() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: customers, isLoading: customerLoading, error } = useQuery<Product[]>({
-    queryKey: [base_url + "/api/admin/customers"],
+  const { data, isLoading: customerLoading, error,refetch } = useQuery<Product[]>({
+    queryKey: [base_url + `/api/admin/customers?page=${page}&limit=${limit}`],
     retry: false,
   });
 
@@ -125,6 +127,37 @@ export default function Products() {
       resetForm()
     }
   }, [isAddDialogOpen])
+
+  const customers = data?.customers || [];
+  const totalPages = data?.pages * 10 || 10;
+  const currentPage = data?.page || 1;
+
+
+  useEffect(() => {
+      setPage(currentPage)
+  }, [currentPage])
+
+
+  function itemRender(current, type, originalElement) {
+      if (type === "prev") {
+          return <a>Previous</a>;
+      }
+      if (type === "next") {
+          return <a>Next</a>;
+      }
+      return originalElement;
+  }
+
+  const pagination = (page, pageSize) => {
+      setPage(page);
+      setLimit(pageSize)
+
+  };
+
+  useEffect(() => {
+      refetch();
+
+  }, [limit, page]);
 
 
 
@@ -182,7 +215,7 @@ export default function Products() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {customers?.customers?.map((product: Product) => (
+                  {customers?.map((product: Product) => (
                     <TableRow key={product._id}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
@@ -223,6 +256,15 @@ export default function Products() {
                     </TableRow>
                   ))}
                 </TableBody>
+                <br />
+                <div className="d-flex  justify-content-center align-items-center pt-5 pb-5" style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Pagination
+                    current={page}
+                    total={totalPages}
+                    onChange={pagination}
+                    itemRender={itemRender}
+                  />{" "}
+                </div>
               </Table>
             ) : (
               <div className="text-center py-8 text-gray-500">
