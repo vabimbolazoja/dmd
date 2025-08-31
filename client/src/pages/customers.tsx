@@ -216,7 +216,7 @@ export default function Products() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {customers?.map((product: Product) => (
+                  {customers?.customers?.map((product: Product) => (
                     <TableRow key={product._id}>
                       <TableCell>
                         <div className="flex items-center space-x-3">
