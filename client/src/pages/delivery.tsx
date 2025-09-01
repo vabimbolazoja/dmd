@@ -14,7 +14,7 @@ import { Separator } from "@/components/ui/separator";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Badge } from "@/components/ui/badge";
-import { Switch } from 'antd'
+import { Switch , Pagination} from 'antd'
 import {base_url} from "../config"
 import {
   Select,
@@ -61,6 +61,8 @@ export default function Products() {
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [order, setOrder] = useState(null);
   const [prodId,setProdId] = useState("")
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
 
   const [formData, setFormData] = useState({
     name: "",
@@ -100,8 +102,8 @@ export default function Products() {
     }
   }, [isAuthenticated, isLoading, toast]);
 
-  const { data: products, isLoading: productsLoading, error } = useQuery<Product[]>({
-    queryKey: [base_url + "/api/admin/orders-delivery"],
+  const { data, isLoading: productsLoading, error, refetch } = useQuery<Product[]>({
+    queryKey: [base_url + `/api/admin/orders-delivery?page=${page}&limit=${limit}`],
     retry: false,
   });
 
@@ -298,6 +300,37 @@ export default function Products() {
     );
   }
 
+  const products = data?.orders || [];
+  const totalPages = data?.pages * 10 || 10;
+  const currentPage = data?.page || 1;
+
+
+  useEffect(() => {
+      setPage(currentPage)
+  }, [currentPage])
+
+
+  function itemRender(current, type, originalElement) {
+      if (type === "prev") {
+          return <a>Previous</a>;
+      }
+      if (type === "next") {
+          return <a>Next</a>;
+      }
+      return originalElement;
+  }
+
+  const pagination = (page, pageSize) => {
+      setPage(page);
+      setLimit(pageSize)
+
+  };
+
+  useEffect(() => {
+      refetch();
+
+  }, [limit, page]);
+
 
 
 
@@ -323,7 +356,7 @@ export default function Products() {
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
               </div>
-            ) : products?.orders?.length > 0 ? (
+            ) : products?.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -337,7 +370,7 @@ export default function Products() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {products?.orders?.map((product: Product) => (
+                  {products?.map((product: Product) => (
                     <TableRow key={product._id}>
                       <TableCell>{product.ref}</TableCell>
 
@@ -452,6 +485,15 @@ export default function Products() {
                     </TableRow>
                   ))}
                 </TableBody>
+                <br />
+                <div className="d-flex  justify-content-center align-items-center pt-5 pb-5" style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Pagination
+                    current={page}
+                    total={totalPages}
+                    onChange={pagination}
+                    itemRender={itemRender}
+                  />{" "}
+                </div>
               </Table>
             ) : (
               <div className="text-center py-8 text-gray-500">
