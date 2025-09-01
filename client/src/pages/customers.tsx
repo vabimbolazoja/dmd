@@ -220,16 +220,9 @@ export default function Products() {
                   {customers?.map((product: Product) => (
                     <TableRow key={product._id}>
                       <TableCell>
-                        <div className="flex items-center space-x-3">
-                          <img
-                            src={product?.image}
-                            alt={product.image}
-                            className="w-12 h-12 rounded-lg object-cover"
-                          />
-                          <div>
-                            <p className="font-medium text-gray-900">{product.firstName + " " +  product?.lastName}</p>
-                          </div>
-                        </div>
+                        
+                        {product.firstName + " " +  product?.lastName}
+                         
                       </TableCell>
                       <TableCell>{product.email}</TableCell>
                       <TableCell>{product.phoneNumber}</TableCell>
@@ -244,7 +237,7 @@ export default function Products() {
                           {product.isDisabled ? "Inactive" : "Active"}
                         </Badge>
                       </TableCell>
-                      <TableCell>
+                      {/* <TableCell>
                         <div className="flex items-center space-x-2">
                           <Button
                             variant="outline"
@@ -254,7 +247,7 @@ export default function Products() {
                           </Button>
                           
                         </div>
-                      </TableCell>
+                      </TableCell> */}
                     </TableRow>
                   ))}
                 </TableBody>
