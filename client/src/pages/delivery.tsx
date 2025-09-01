@@ -301,7 +301,7 @@ export default function Products() {
   }
 
   const products = data?.orders || [];
-  const totalPages = data?.pages * 10 || 10;
+  const totalPages = data?.totalPages * 10 || 10;
   const currentPage = data?.page || 1;
 
 
