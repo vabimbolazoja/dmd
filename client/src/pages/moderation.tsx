@@ -123,7 +123,7 @@ export default function Products() {
             queryClient.invalidateQueries({ queryKey: [base_url + "/api/moderations/config"] });
             toast({
                 title: "Success",
-                description: "Moderation created successfully",
+                description: "Delivery Cost Set up created successfully",
             });
             setIsAddDialogOpen(false);
             resetForm();
@@ -160,7 +160,7 @@ export default function Products() {
             resetForm();
             toast({
                 title: "Success",
-                description: "Moderation updated successfully",
+                description: "Delivery Cost setup updated successfully",
             });
         },
         onError: (error) => {
@@ -242,8 +242,8 @@ export default function Products() {
                 {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <div>
-                        <h2 className="text-2xl font-bold text-gray-900">Moderation</h2>
-                        <p className="text-gray-600">Manage your moderations</p>
+                        <h2 className="text-2xl font-bold text-gray-900">Delivery Cost Setup</h2>
+                        <p className="text-gray-600">Manage your delivery cost setup</p>
                     </div>
 
                     <Dialog open={isAddDialogOpen} onOpenChange={setIsAddDialogOpen}>
@@ -255,9 +255,9 @@ export default function Products() {
                         </DialogTrigger>
                         <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
                             <DialogHeader>
-                                <DialogTitle>Add New Moderation</DialogTitle>
+                                <DialogTitle>Add New Delivery Cost Setup</DialogTitle>
                                 <DialogDescription>
-                                    Create a new moderation config
+                                    Create a new delivery cost setup
                                 </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={handleSubmit} className="space-y-4">
@@ -298,7 +298,7 @@ export default function Products() {
 
                                 <DialogFooter>
                                     <Button type="submit" disabled={createMutation.isPending}>
-                                        {createMutation.isPending ? "Creating..." : "Create Moderation"}
+                                        {createMutation.isPending ? "Creating..." : "Create Delivery Setup"}
                                     </Button>
                                 </DialogFooter>
                             </form>
@@ -309,7 +309,7 @@ export default function Products() {
                 {/* Products Table */}
                 <Card>
                     <CardHeader>
-                        <CardTitle>Moderation Setup</CardTitle>
+                        <CardTitle>Delivery Cost Setup</CardTitle>
                     </CardHeader>
                     <CardContent>
                         {productsLoading ? (
@@ -373,9 +373,9 @@ export default function Products() {
                 <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
                     <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
-                            <DialogTitle>Edit Moderation</DialogTitle>
+                            <DialogTitle>Edit Delivery Cost setup</DialogTitle>
                             <DialogDescription>
-                                Update moderation information.
+                                Update delivery cost setup .
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4">
@@ -415,7 +415,7 @@ export default function Products() {
                             </div>
                             <DialogFooter>
                                 <Button type="submit" disabled={updateMutation.isPending}>
-                                    {updateMutation.isPending ? "Updating..." : "Update Moderation"}
+                                    {updateMutation.isPending ? "Updating..." : "Update Delivery Setup"}
                                 </Button>
                             </DialogFooter>
                         </form>
