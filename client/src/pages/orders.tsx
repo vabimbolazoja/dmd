@@ -367,7 +367,7 @@ export default function Products() {
             <CardTitle>Orders List</CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="flex justify-end">
+            <div className="flex justify-center">
               <div>
                 <div className="flex items-center">
                   <div className="mr-3">
@@ -376,10 +376,7 @@ export default function Products() {
                       value={searchVal}
                       onChange={(e) => setSearchVal(e.target.value)}
                     />
-                    <br />
-                    <Button type="submit" onClick={() => refetch()}>
-                    Search
-                  </Button>
+                  
                 </div>
                 <div className="mr-3">
                   <div>
@@ -391,7 +388,7 @@ export default function Products() {
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        {['PENDING, DELIVERED',]?.map((carrier) => (
+                        {['PENDING, DELIVERED']?.map((carrier) => (
                           <SelectItem key={carrier} value={carrier}>
                             {carrier}
                           </SelectItem>
@@ -411,11 +408,12 @@ export default function Products() {
                         <SelectValue placeholder="Select" />
                       </SelectTrigger>
                       <SelectContent>
-                        {['PENDING, PAID',]?.map((carrier) => (
+                        {['PENDING, PAID']?.map((carrier) => (
                           <SelectItem key={carrier} value={carrier}>
                             {carrier}
                           </SelectItem>
                         ))}
+                        
                       </SelectContent>
                     </Select>
                   </div>
