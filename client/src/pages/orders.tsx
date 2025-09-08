@@ -376,262 +376,270 @@ export default function Products() {
                       value={searchVal}
                       onChange={(e) => setSearchVal(e.target.value)}
                     />
-                  
-                </div>
-                <div className="mr-3">
-                  <div>
-                    <Select
-                      value={statusFilter}
-                      onValueChange={(value) => setStatusFilter(value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {['PENDING, DELIVERED']?.map((carrier) => (
-                          <SelectItem key={carrier} value={carrier}>
-                            {carrier}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  </div>
 
-                </div>
-                <div>
-                  <div>
-                    <Select
-                      value={paymentFilter}
-                      onValueChange={(value) => setPaymentFilter(value)}
-                    >
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        {['PENDING, PAID']?.map((carrier) => (
-                          <SelectItem key={carrier} value={carrier}>
-                            {carrier}
-                          </SelectItem>
-                        ))}
-                        
-                      </SelectContent>
-                    </Select>
                   </div>
+                  <div className="mr-3">
+                    <div style={{ width: '120px' }}>
+                      <Select
+                        value={statusFilter}
+                        onValueChange={(value) => setStatusFilter(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem>
+                            select
+                          </SelectItem>
+                          <SelectItem >
+                            PENDING
+                          </SelectItem>
+                          <SelectItem >
+                            PAID
+                          </SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
 
+                  </div>
+                  <div>
+                    <div style={{ width: '120px' }}>
+                      <Select
+                        value={paymentFilter}
+                        onValueChange={(value) => setPaymentFilter(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem>
+                            select
+                          </SelectItem>
+                          <SelectItem >
+                            PENDING
+                          </SelectItem>
+                          <SelectItem >
+                            PAID
+                          </SelectItem>
+
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                  </div>
                 </div>
               </div>
+
             </div>
-
-          </div>
-          <br />
-          {productsLoading ? (
-            <div className="flex items-center justify-center py-8">
-              <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
-            </div>
-          ) : products?.length > 0 ? (
-            <Table>
-              <TableHeader>
-                <TableRow>
-                  <TableHead>Ref</TableHead>
-                  <TableHead>Customer</TableHead>
-                  <TableHead>Order Amount</TableHead>
-                  <TableHead>Payment Status</TableHead>
-                  <TableHead>Order Status</TableHead>
-                  <TableHead>Date</TableHead>
-                  <TableHead>Actions</TableHead>
-                </TableRow>
-              </TableHeader>
-              <TableBody>
-                {products?.map((product: Product) => (
-                  <TableRow key={product._id}>
-                    <TableCell>{product.ref}</TableCell>
-
-                    <TableCell>{product.userEmail}</TableCell>
-                    <TableCell>{product?.paymentType === 'NGN' ? 'N' : '$'}{product.totalAmt}</TableCell>
-
-                    <TableCell>
-                      <Badge variant={product.paymentStatus === 'PAID' ? "default" : "secondary"}>
-                        {product.paymentStatus}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant={product.orderStatus === 'DELIVERED' ? "default" : "secondary"}>
-                        {product.orderStatus}
-                      </Badge>
-                    </TableCell>
-                    <TableCell>{product?.date}</TableCell>
-
-                    <TableCell>
-                      <div className="flex items-center space-x-2">
-                        <Button
-                          variant="outline"
-                          size="sm"
-                          onClick={() => handleEdit(product)}
-                        >
-                          More
-                        </Button>
-
-
-                      </div>
-                    </TableCell>
+            <br />
+            {productsLoading ? (
+              <div className="flex items-center justify-center py-8">
+                <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
+              </div>
+            ) : products?.length > 0 ? (
+              <Table>
+                <TableHeader>
+                  <TableRow>
+                    <TableHead>Ref</TableHead>
+                    <TableHead>Customer</TableHead>
+                    <TableHead>Order Amount</TableHead>
+                    <TableHead>Payment Status</TableHead>
+                    <TableHead>Order Status</TableHead>
+                    <TableHead>Date</TableHead>
+                    <TableHead>Actions</TableHead>
                   </TableRow>
-                ))}
-              </TableBody>
-              <div className="d-flex  justify-content-center align-items-center pt-5 pb-5" style={{ display: 'flex', justifyContent: 'center' }}>
-                <Pagination
-                  current={page}
-                  total={totalPages}
-                  onChange={pagination}
-                  itemRender={itemRender}
-                />{" "}
-              </div>
-            </Table>
-          ) : (
-            <div className="text-center py-8 text-gray-500">
-              <Package className="mx-auto mb-4" size={48} />
-              <p>No orders found</p>
-            </div>
-          )}
-        </CardContent>
-      </Card>
+                </TableHeader>
+                <TableBody>
+                  {products?.map((product: Product) => (
+                    <TableRow key={product._id}>
+                      <TableCell>{product.ref}</TableCell>
 
-      {/* Edit Dialog */}
-      <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
-        <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Order {editingProduct?.ref}</DialogTitle>
-            <DialogDescription>
-              Order Details information.
-            </DialogDescription>
-          </DialogHeader>
-          <div className="space-y-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-slate-50 rounded-lg">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <Badge className={`${getStatusColor(order?.orderStatus)}`}>
-                    <div className="flex items-center">
-                      {getStatusIcon(order?.orderStatus)}
-                      <span className="ml-1 capitalize">{order?.orderStatus}</span>
-                    </div>
-                  </Badge>
+                      <TableCell>{product.userEmail}</TableCell>
+                      <TableCell>{product?.paymentType === 'NGN' ? 'N' : '$'}{product.totalAmt}</TableCell>
+
+                      <TableCell>
+                        <Badge variant={product.paymentStatus === 'PAID' ? "default" : "secondary"}>
+                          {product.paymentStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant={product.orderStatus === 'DELIVERED' ? "default" : "secondary"}>
+                          {product.orderStatus}
+                        </Badge>
+                      </TableCell>
+                      <TableCell>{product?.date}</TableCell>
+
+                      <TableCell>
+                        <div className="flex items-center space-x-2">
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={() => handleEdit(product)}
+                          >
+                            More
+                          </Button>
+
+
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))}
+                </TableBody>
+                <div className="d-flex  justify-content-center align-items-center pt-5 pb-5" style={{ display: 'flex', justifyContent: 'center' }}>
+                  <Pagination
+                    current={page}
+                    total={totalPages}
+                    onChange={pagination}
+                    itemRender={itemRender}
+                  />{" "}
                 </div>
-                <p className="text-sm text-slate-600">
-                  Order placed on {new Date(order?.createdAt).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: 'long',
-                    day: 'numeric'
-                  })}
-                </p>
+              </Table>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Package className="mx-auto mb-4" size={48} />
+                <p>No orders found</p>
               </div>
+            )}
+          </CardContent>
+        </Card>
 
-            </div>
-
-            <div>
-              <h3 className="text-lg font-semibold text-slate-900 mb-4">Items Ordered</h3>
-              <div className="space-y-4">
-                {order?.orders.map((item) => (
-                  <div key={item.prod_id} className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg">
-                    <img
-                      src={item.image}
-                      alt={item.prod_name}
-                      className="w-20 h-20 object-cover rounded-lg"
-                    />
-                    <div className="flex-1">
-                      <h4 className="font-semibold text-slate-900">{item.prod_name}</h4>
-                      <p className="text-sm text-slate-600">Quantity: {item.qty}</p>
-                    </div>
-                    <div className="text-right">
-                      <p className="font-semibold text-slate-900">
-                        {order.paymentType === 'USD' ? '$' : '₦'}{item.price}
-                      </p>
-                      <p className="text-sm text-slate-600">each</p>
-                    </div>
+        {/* Edit Dialog */}
+        <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
+          <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Order {editingProduct?.ref}</DialogTitle>
+              <DialogDescription>
+                Order Details information.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-slate-50 rounded-lg">
+                <div>
+                  <div className="flex items-center gap-2 mb-1">
+                    <Badge className={`${getStatusColor(order?.orderStatus)}`}>
+                      <div className="flex items-center">
+                        {getStatusIcon(order?.orderStatus)}
+                        <span className="ml-1 capitalize">{order?.orderStatus}</span>
+                      </div>
+                    </Badge>
                   </div>
-                ))}
+                  <p className="text-sm text-slate-600">
+                    Order placed on {new Date(order?.createdAt).toLocaleDateString('en-US', {
+                      year: 'numeric',
+                      month: 'long',
+                      day: 'numeric'
+                    })}
+                  </p>
+                </div>
+
               </div>
-            </div>
 
-            <Separator />
-
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Order Summary */}
               <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Order Summary</h3>
-                <div className="space-y-2">
-                  <div className="flex justify-between">
-                    <span className="text-slate-600">Subtotal</span>
-                    <span className="font-medium">
-                      {order?.paymentType === 'USD' ? '$' : '₦'}{order?.totalAmt || order?.totalAmt}
-                    </span>
+                <h3 className="text-lg font-semibold text-slate-900 mb-4">Items Ordered</h3>
+                <div className="space-y-4">
+                  {order?.orders.map((item) => (
+                    <div key={item.prod_id} className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg">
+                      <img
+                        src={item.image}
+                        alt={item.prod_name}
+                        className="w-20 h-20 object-cover rounded-lg"
+                      />
+                      <div className="flex-1">
+                        <h4 className="font-semibold text-slate-900">{item.prod_name}</h4>
+                        <p className="text-sm text-slate-600">Quantity: {item.qty}</p>
+                      </div>
+                      <div className="text-right">
+                        <p className="font-semibold text-slate-900">
+                          {order.paymentType === 'USD' ? '$' : '₦'}{item.price}
+                        </p>
+                        <p className="text-sm text-slate-600">each</p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <Separator />
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* Order Summary */}
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Order Summary</h3>
+                  <div className="space-y-2">
+                    <div className="flex justify-between">
+                      <span className="text-slate-600">Subtotal</span>
+                      <span className="font-medium">
+                        {order?.paymentType === 'USD' ? '$' : '₦'}{order?.totalAmt || order?.totalAmt}
+                      </span>
+                    </div>
+
+                    <Separator />
+                    <div className="flex justify-between text-lg font-bold">
+                      <span>Total</span>
+                      <span>{order?.paymentType === 'USD' ? '$' : '₦'}{order?.totalAmt}</span>
+                    </div>
                   </div>
 
+                  <div className="mt-4">
+                    <h4 className="font-semibold text-slate-900 mb-2">Payment Method</h4>
+                    <div className="flex items-center gap-2">
+                      <span className="text-slate-600">{'Credit Card'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div>
+                  <h3 className="text-lg font-semibold text-slate-900 mb-4">Customer Information</h3>
+                  {order?.deliveryInfo && (
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2">
+                        <Package className="h-4 w-4 text-slate-600" />
+                        <span className="text-slate-600">{order?.deliveryInfo.name}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Mail className="h-4 w-4 text-slate-600" />
+                        <span className="text-slate-600">{order?.deliveryInfo.email}</span>
+                      </div>
+                      <div className="flex items-center gap-2">
+                        <Phone className="h-4 w-4 text-slate-600" />
+                        <span className="text-slate-600">{order?.deliveryInfo.phone}</span>
+                      </div>
+                    </div>
+                  )}
+
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-slate-900 mb-2">Shipping Address</h4>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
+                      <span className="text-slate-600">{order?.deliveryInfo?.address}</span>
+                    </div>
+                  </div>
                   <Separator />
-                  <div className="flex justify-between text-lg font-bold">
-                    <span>Total</span>
-                    <span>{order?.paymentType === 'USD' ? '$' : '₦'}{order?.totalAmt}</span>
-                  </div>
-                </div>
-
-                <div className="mt-4">
-                  <h4 className="font-semibold text-slate-900 mb-2">Payment Method</h4>
-                  <div className="flex items-center gap-2">
-                    <span className="text-slate-600">{'Credit Card'}</span>
-                  </div>
-                </div>
-              </div>
-
-              <div>
-                <h3 className="text-lg font-semibold text-slate-900 mb-4">Customer Information</h3>
-                {order?.deliveryInfo && (
-                  <div className="space-y-3">
-                    <div className="flex items-center gap-2">
-                      <Package className="h-4 w-4 text-slate-600" />
-                      <span className="text-slate-600">{order?.deliveryInfo.name}</span>
+                  <div className="mt-6">
+                    <h4 className="font-semibold text-slate-900 mb-2">Delivery Details</h4>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
+                      <span className="text-slate-600">Rider Name - {order?.rider ?? 'NA'}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Mail className="h-4 w-4 text-slate-600" />
-                      <span className="text-slate-600">{order?.deliveryInfo.email}</span>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
+                      <span className="text-slate-600">Expected Delivery Date- {order?.expectedDate ?? 'na'}</span>
                     </div>
-                    <div className="flex items-center gap-2">
-                      <Phone className="h-4 w-4 text-slate-600" />
-                      <span className="text-slate-600">{order?.deliveryInfo.phone}</span>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
+                      <span className="text-slate-600">Current Location- {order?.location ?? 'na'}</span>
                     </div>
-                  </div>
-                )}
-
-                <div className="mt-6">
-                  <h4 className="font-semibold text-slate-900 mb-2">Shipping Address</h4>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                    <span className="text-slate-600">{order?.deliveryInfo?.address}</span>
-                  </div>
-                </div>
-                <Separator />
-                <div className="mt-6">
-                  <h4 className="font-semibold text-slate-900 mb-2">Delivery Details</h4>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                    <span className="text-slate-600">Rider Name - {order?.rider ?? 'NA'}</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                    <span className="text-slate-600">Expected Delivery Date- {order?.expectedDate ?? 'na'}</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                    <span className="text-slate-600">Current Location- {order?.location ?? 'na'}</span>
-                  </div>
-                  <div className="flex items-start gap-2">
-                    <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                    <span className="text-slate-600">Status- {order?.orderStatus}</span>
+                    <div className="flex items-start gap-2">
+                      <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
+                      <span className="text-slate-600">Status- {order?.orderStatus}</span>
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
-    </div>
+          </DialogContent>
+        </Dialog>
+      </div>
     </AdminLayout >
   );
 }
