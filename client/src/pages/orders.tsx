@@ -346,12 +346,6 @@ export default function Products() {
     );
   }
 
-  useEffect(() => {
-    setTimeout(() => {
-      refetch()
-    },600)
-  },[searchVal])
-
 
 
 
@@ -380,14 +374,12 @@ export default function Products() {
                     <Input
                       id="search"
                       value={searchVal}
-                      placeholder="Search by Order ref, amount.."
                       onChange={(e) => setSearchVal(e.target.value)}
                     />
 
                   </div>
                   <div className="mr-3">
                     <div style={{ width: '120px' }}>
-                      <label>Filter By Order Status</label>
                       <Select
                         value={statusFilter}
                         onValueChange={(value) => setStatusFilter(value)}
@@ -412,33 +404,6 @@ export default function Products() {
                   </div>
                   <div>
                     <div style={{ width: '120px' }}>
-                    <label>Filter By Payment Status</label>
-                      <Select
-                        value={paymentFilter}
-                        onValueChange={(value) => setPaymentFilter(value)}
-                      >
-                        <SelectTrigger>
-                          <SelectValue placeholder="Select" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem>
-                            select
-                          </SelectItem>
-                          <SelectItem >
-                            PENDING
-                          </SelectItem>
-                          <SelectItem >
-                            PAID
-                          </SelectItem>
-
-                        </SelectContent>
-                      </Select>
-                    </div>
-
-                  </div>
-                  <div>
-                    <div style={{ width: '120px' }}>
-                    <label>Filter By Date Status</label>
                       <Select
                         value={paymentFilter}
                         onValueChange={(value) => setPaymentFilter(value)}
