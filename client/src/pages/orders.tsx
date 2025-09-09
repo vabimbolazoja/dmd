@@ -60,6 +60,7 @@ export default function Products() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [order, setOrder] = useState(null);
+  const [dateVal, setDateVal] = useState("")
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
 
@@ -346,6 +347,12 @@ export default function Products() {
     );
   }
 
+  useEffect(() => {
+    setTimeout(() => {
+      refetch()
+    }, 600)
+  }, [searchVal])
+
 
 
 
@@ -374,12 +381,14 @@ export default function Products() {
                     <Input
                       id="search"
                       value={searchVal}
+                      placeholder="Search by Order ref, amount.."
                       onChange={(e) => setSearchVal(e.target.value)}
                     />
 
                   </div>
                   <div className="mr-3">
                     <div style={{ width: '120px' }}>
+                      <label>Filter By Order Status</label>
                       <Select
                         value={statusFilter}
                         onValueChange={(value) => setStatusFilter(value)}
@@ -404,6 +413,7 @@ export default function Products() {
                   </div>
                   <div>
                     <div style={{ width: '120px' }}>
+                      <label>Filter By Payment Status</label>
                       <Select
                         value={paymentFilter}
                         onValueChange={(value) => setPaymentFilter(value)}
@@ -424,6 +434,19 @@ export default function Products() {
 
                         </SelectContent>
                       </Select>
+                    </div>
+
+                  </div>
+                  <div>
+                    <div style={{ width: '120px' }}>
+                      <label>Filter By Date</label>
+                      <Input
+                        id="date"
+                        value={dateVal}
+                        type="date"
+                        onChange={(e) => setDateVal(e.target.value)}
+                      />
+
                     </div>
 
                   </div>
