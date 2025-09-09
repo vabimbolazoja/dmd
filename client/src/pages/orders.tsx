@@ -371,9 +371,11 @@ export default function Products() {
               <div>
                 <div className="flex items-center">
                   <div className="mr-3">
+                  <label style={{whiteSpace:'nowrap'}}>Search By order id, amount</label>
                     <Input
                       id="search"
                       value={searchVal}
+                      placeholder="Search"
                       onChange={(e) => setSearchVal(e.target.value)}
                     />
 
