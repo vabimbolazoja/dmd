@@ -379,8 +379,8 @@ export default function Products() {
 
                   </div>
                   <div className="mr-3">
-                    <div style={{ width: '120px' }}>
-                      <label>Filter By Order Status</label>
+                    <div style={{ width: '220px' }}>
+                      <label style={{whiteSpace:'nowrap'}}>Filter By Order Status</label>
                       <Select
                         value={statusFilter}
                         onValueChange={(value) => setStatusFilter(value)}
@@ -404,8 +404,8 @@ export default function Products() {
 
                   </div>
                   <div>
-                    <div style={{ width: '120px' }}>
-                    <label>Filter By Payment Status</label>
+                    <div style={{ width: '220px' }}>
+                    <label style={{whiteSpace:'nowrap'}}>Filter By Payment Status</label>
 
                       <Select
                         value={paymentFilter}
