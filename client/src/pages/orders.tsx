@@ -370,8 +370,8 @@ export default function Products() {
             <div className="flex justify-center">
               <div>
                 <div className="flex items-center">
-                  <div className="mr-3">
-                  <label style={{whiteSpace:'nowrap'}}>Search By order id, amount</label>
+                  <div className="mr-5">
+                    <label style={{ whiteSpace: 'nowrap' }}>Search By order id, amount</label>
                     <Input
                       id="search"
                       value={searchVal}
@@ -380,26 +380,22 @@ export default function Products() {
                     />
 
                   </div>
-                  <div className="mr-3">
+                  <div className="mr-5">
                     <div style={{ width: '220px' }}>
-                      <label style={{whiteSpace:'nowrap'}}>Filter By Order Status</label>
+                      <label style={{ whiteSpace: 'nowrap' }}>Filter By Order Status</label>
                       <Select
                         value={statusFilter}
-                        onValueChange={(value) => setStatusFilter(value)}
+                        onValueChange={(value) => console.log(value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem>
-                            select
-                          </SelectItem>
-                          <SelectItem >
-                            PENDING
-                          </SelectItem>
-                          <SelectItem >
-                            PAID
-                          </SelectItem>
+                          {['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS']?.map((cont) => (
+                            <SelectItem key={cont} value={cont}>
+                              {cont}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
@@ -407,26 +403,21 @@ export default function Products() {
                   </div>
                   <div>
                     <div style={{ width: '220px' }}>
-                    <label style={{whiteSpace:'nowrap'}}>Filter By Payment Status</label>
+                      <label style={{ whiteSpace: 'nowrap' }}>Filter By Payment Status</label>
 
                       <Select
                         value={paymentFilter}
-                        onValueChange={(value) => setPaymentFilter(value)}
+                        onValueChange={(value) => console.log(value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                          <SelectItem>
-                            select
-                          </SelectItem>
-                          <SelectItem >
-                            PENDING
-                          </SelectItem>
-                          <SelectItem >
-                            PAID
-                          </SelectItem>
-
+                          {['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS']?.map((cont) => (
+                            <SelectItem key={cont} value={cont}>
+                              {cont}
+                            </SelectItem>
+                          ))}
                         </SelectContent>
                       </Select>
                     </div>
