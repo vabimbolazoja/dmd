@@ -118,7 +118,6 @@ export default function Products() {
 
 
 
-  // Handle unauthorized errors
   useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {
       toast({
