@@ -391,7 +391,7 @@ export default function Products() {
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                          {['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS']?.map((cont) => (
+                          {['PENDING', 'DELIVERED', 'CANCELLED']?.map((cont) => (
                             <SelectItem key={cont} value={cont}>
                               {cont}
                             </SelectItem>
@@ -413,7 +413,7 @@ export default function Products() {
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                          {['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS']?.map((cont) => (
+                          {['PENDING', 'PAID']?.map((cont) => (
                             <SelectItem key={cont} value={cont}>
                               {cont}
                             </SelectItem>
