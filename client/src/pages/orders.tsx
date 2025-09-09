@@ -385,7 +385,7 @@ export default function Products() {
                       <label style={{ whiteSpace: 'nowrap' }}>Filter By Order Status</label>
                       <Select
                         value={statusFilter}
-                        onValueChange={(value) => console.log(value)}
+                        onValueChange={(value) => setStatusFilter(value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select" />
@@ -407,7 +407,7 @@ export default function Products() {
 
                       <Select
                         value={paymentFilter}
-                        onValueChange={(value) => console.log(value)}
+                        onValueChange={(value) => setPaymentFilter(value)}
                       >
                         <SelectTrigger>
                           <SelectValue placeholder="Select" />
