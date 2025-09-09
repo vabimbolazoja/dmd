@@ -60,7 +60,6 @@ export default function Products() {
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [order, setOrder] = useState(null);
-  const [dateVal, setDateVal] = useState("")
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
 
@@ -118,6 +117,7 @@ export default function Products() {
 
 
 
+  // Handle unauthorized errors
   useEffect(() => {
     if (error && isUnauthorizedError(error as Error)) {
       toast({
@@ -349,8 +349,8 @@ export default function Products() {
   useEffect(() => {
     setTimeout(() => {
       refetch()
-    }, 600)
-  }, [searchVal])
+    },600)
+  },[searchVal])
 
 
 
@@ -412,7 +412,7 @@ export default function Products() {
                   </div>
                   <div>
                     <div style={{ width: '120px' }}>
-                      <label>Filter By Payment Status</label>
+                    <label>Filter By Payment Status</label>
                       <Select
                         value={paymentFilter}
                         onValueChange={(value) => setPaymentFilter(value)}
@@ -438,14 +438,27 @@ export default function Products() {
                   </div>
                   <div>
                     <div style={{ width: '120px' }}>
-                      <label>Filter By Date</label>
-                      <Input
-                        id="date"
-                        value={dateVal}
-                        type="date"
-                        onChange={(e) => setDateVal(e.target.value)}
-                      />
+                    <label>Filter By Date Status</label>
+                      <Select
+                        value={paymentFilter}
+                        onValueChange={(value) => setPaymentFilter(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem>
+                            select
+                          </SelectItem>
+                          <SelectItem >
+                            PENDING
+                          </SelectItem>
+                          <SelectItem >
+                            PAID
+                          </SelectItem>
 
+                        </SelectContent>
+                      </Select>
                     </div>
 
                   </div>
