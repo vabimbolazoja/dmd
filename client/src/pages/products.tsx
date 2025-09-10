@@ -108,7 +108,7 @@ export default function Products() {
   }, [isAuthenticated, isLoading, toast]);
 
   const { data, isLoading: productsLoading, error, refetch } = useQuery<Product[]>({
-    queryKey: [base_url + `/api/products?page=${page}&limit=${limit}`],
+    queryKey: [base_url + `/api/products?page=${page}&limit=${limit}&search=${searchVal}&status=${prodFilter}`],
     retry: false,
   });
 
