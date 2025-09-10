@@ -57,6 +57,7 @@ export default function Products() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
+  const [searchVal,setSearchVal] = useState("")
   const [imageUrls, setImageUrls] = useState<string[]>([]);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [order, setOrder] = useState(null);
@@ -103,7 +104,7 @@ export default function Products() {
   }, [isAuthenticated, isLoading, toast]);
 
   const { data, isLoading: productsLoading, error, refetch } = useQuery<Product[]>({
-    queryKey: [base_url + `/api/admin/orders-delivery?page=${page}&limit=${limit}`],
+    queryKey: [base_url + `/api/admin/orders-delivery?page=${page}&limit=${limit}&search=${searchVal}`],
     retry: false,
   });
 
@@ -329,7 +330,7 @@ export default function Products() {
   useEffect(() => {
       refetch();
 
-  }, [limit, page]);
+  }, [limit, page,searchVal]);
 
 
 
@@ -352,6 +353,25 @@ export default function Products() {
             <CardTitle>Pending Deliveries</CardTitle>
           </CardHeader>
           <CardContent>
+          <div className="flex justify-center">
+              <div>
+                <div className="">
+                  <div className="mr-5">
+                    <label style={{ whiteSpace: 'nowrap' }}>Search By order ID, Email</label>
+                    <Input
+                      id="search"
+                      value={searchVal}
+                      placeholder="Search"
+                      onChange={(e) => setSearchVal(e.target.value)}
+                    />
+
+                  </div>
+              
+                </div>
+              </div>
+
+            </div>
+            <br />
             {productsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />

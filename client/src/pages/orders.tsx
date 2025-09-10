@@ -201,7 +201,7 @@ export default function Products() {
   useEffect(() => {
     refetch();
 
-  }, [limit, page, paymentFilter, statusFilter]);
+  }, [limit, page, paymentFilter, statusFilter, searchVal]);
 
 
 
