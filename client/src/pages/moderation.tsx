@@ -250,7 +250,7 @@ export default function Products() {
                         <DialogTrigger asChild>
                             <Button className="bg-blue-600 hover:bg-blue-700">
                                 <Plus className="mr-2 h-4 w-4" />
-                                Add Config
+                                Add Delivery Setup
                             </Button>
                         </DialogTrigger>
                         <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
