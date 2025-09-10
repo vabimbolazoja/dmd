@@ -391,7 +391,7 @@ export default function Products() {
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                          {['PENDING', 'DELIVERED', 'CANCELLED']?.map((cont) => (
+                          {['PENDING', 'DELIVERED', 'CANCELLED','RESCHEDULED']?.map((cont) => (
                             <SelectItem key={cont} value={cont}>
                               {cont}
                             </SelectItem>

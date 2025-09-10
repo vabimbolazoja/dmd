@@ -362,6 +362,7 @@ export default function Products() {
                       id="search"
                       value={searchVal}
                       placeholder="Search"
+                      style={{width:'300px'}}
                       onChange={(e) => setSearchVal(e.target.value)}
                     />
 
