@@ -108,7 +108,7 @@ export default function Products() {
   }, [isAuthenticated, isLoading, toast]);
 
   const { data, isLoading: productsLoading, error, refetch } = useQuery<Product[]>({
-    queryKey: [base_url + `/api/products?page=${page}&limit=${limit}&search=${searchVal}&status=${prodFilter}`],
+    queryKey: [base_url + `/api/products?page=${page}&limit=${limit}&search=${searchVal}&status=${prodFilter === 'Low Stock' ? 'stock' : prodFilter}`],
     retry: false,
   });
 
@@ -492,7 +492,7 @@ export default function Products() {
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                          {['Actie', 'Inactive']?.map((cont) => (
+                          {['Active', 'Inactive','Low Stock']?.map((cont) => (
                             <SelectItem key={cont} value={cont}>
                               {cont}
                             </SelectItem>
