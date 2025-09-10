@@ -371,7 +371,7 @@ export default function Products() {
               <div>
                 <div className="flex items-center">
                   <div className="mr-5">
-                    <label style={{ whiteSpace: 'nowrap' }}>Search By order id, amount</label>
+                    <label style={{ whiteSpace: 'nowrap' }}>Search By order ID, Email</label>
                     <Input
                       id="search"
                       value={searchVal}
@@ -463,7 +463,7 @@ export default function Products() {
                           {product.orderStatus}
                         </Badge>
                       </TableCell>
-                      <TableCell>{product?.date}</TableCell>
+                      <TableCell>{product?.date?.slice(0,10)}</TableCell>
 
                       <TableCell>
                         <div className="flex items-center space-x-2">
