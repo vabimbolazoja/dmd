@@ -56,10 +56,12 @@ export default function Products() {
   const { toast } = useToast();
   const { isAuthenticated, isLoading } = useAuth();
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-   const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(10)
+  const [page, setPage] = useState(1)
+  const [limit, setLimit] = useState(10)
   const [imageUrlView, setImageurlView] = useState("")
   const [imageUrls, setImageUrls] = useState<string[]>([]);
+  const [prodFilter, setProdFilter] = useState("")
+  const [searchVal, setSearchVal] = useState("")
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
   const [formData, setFormData] = useState({
     name: "",
@@ -239,30 +241,30 @@ export default function Products() {
 
 
   useEffect(() => {
-      setPage(currentPage)
+    setPage(currentPage)
   }, [currentPage])
 
 
   function itemRender(current, type, originalElement) {
-      if (type === "prev") {
-          return <a>Previous</a>;
-      }
-      if (type === "next") {
-          return <a>Next</a>;
-      }
-      return originalElement;
+    if (type === "prev") {
+      return <a>Previous</a>;
+    }
+    if (type === "next") {
+      return <a>Next</a>;
+    }
+    return originalElement;
   }
 
   const pagination = (page, pageSize) => {
-      setPage(page);
-      setLimit(pageSize)
+    setPage(page);
+    setLimit(pageSize)
 
   };
 
   useEffect(() => {
-      refetch();
+    refetch();
 
-  }, [limit, page]);
+  }, [limit, page, prodFilter, searchVal]);
 
 
   const switchChange = (val) => {
@@ -463,6 +465,47 @@ export default function Products() {
             <CardTitle>Product List</CardTitle>
           </CardHeader>
           <CardContent>
+            <div className="flex justify-center">
+              <div>
+                <div className="flex items-center">
+                  <div className="mr-5">
+                    <label style={{ whiteSpace: 'nowrap' }}>Search Products...</label>
+                    <Input
+                      id="search"
+                      value={searchVal}
+                      style={{ width: '300px' }}
+                      placeholder="Search"
+                      onChange={(e) => setSearchVal(e.target.value)}
+                    />
+
+                  </div>
+
+                  <div>
+                    <div style={{ width: '300px' }}>
+                      <label style={{ whiteSpace: 'nowrap' }}>Filter By Product Status</label>
+
+                      <Select
+                        value={prodFilter}
+                        onValueChange={(value) => setProdFilter(value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {['Actie', 'Inactive']?.map((cont) => (
+                            <SelectItem key={cont} value={cont}>
+                              {cont}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                  </div>
+                </div>
+              </div>
+
+            </div>
             {productsLoading ? (
               <div className="flex items-center justify-center py-8">
                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
@@ -539,151 +582,151 @@ export default function Products() {
                   />{" "}
                 </div>
               </Table>
-          ) : (
-          <div className="text-center py-8 text-gray-500">
-            <Package className="mx-auto mb-4" size={48} />
-            <p>No products found</p>
-            <p className="text-sm">Add your first product to get started</p>
-          </div>
+            ) : (
+              <div className="text-center py-8 text-gray-500">
+                <Package className="mx-auto mb-4" size={48} />
+                <p>No products found</p>
+                <p className="text-sm">Add your first product to get started</p>
+              </div>
             )}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
 
-      {/* Edit Dialog */}
-      <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
-        <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle>Edit Product</DialogTitle>
-            <DialogDescription>
-              Update product information.
-            </DialogDescription>
-          </DialogHeader>
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="edit-name">Name</Label>
-              <Input
-                id="edit-name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-description">Description</Label>
-              <Textarea
-                id="edit-description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-description">Nutritional Information</Label>
-              <Textarea
-                id="edit-description"
-                value={formData.nutritionalInfo}
-                onChange={(e) => setFormData({ ...formData, nutritionalInfo: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="edit-description">Storage Instruction</Label>
-              <Textarea
-                id="edit-description"
-                value={formData.storageInstructions}
-                onChange={(e) => setFormData({ ...formData, storageInstructions: e.target.value })}
-              />
-            </div>
-            <div className="grid grid-cols-2 gap-4">
+        {/* Edit Dialog */}
+        <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
+          <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Edit Product</DialogTitle>
+              <DialogDescription>
+                Update product information.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
               <div>
-                <Label htmlFor="price">Price in USD</Label>
+                <Label htmlFor="edit-name">Name</Label>
                 <Input
-                  id="priceUsd"
-                  type="number"
-                  value={formData.priceUsd}
-                  onChange={(e) => setFormData({ ...formData, priceUsd: e.target.value })}
+                  id="edit-name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                   required
                 />
               </div>
               <div>
-                <Label htmlFor="stock">Price in Naira</Label>
-                <Input
-                  id="priceNaira"
-                  type="number"
-                  value={formData.priceNaira}
-                  onChange={(e) => setFormData({ ...formData, priceNaira: parseInt(e.target.value) })}
-                  required
+                <Label htmlFor="edit-description">Description</Label>
+                <Textarea
+                  id="edit-description"
+                  value={formData.description}
+                  onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 />
               </div>
-            </div>
-            <div>
-              <Label htmlFor="carrier">Category</Label>
-              <Select
-                value={formData.category}
-                onValueChange={(value) => setFormData({ ...formData, category: value })}
-                required
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Select a category" />
-                </SelectTrigger>
-                <SelectContent>
-                  {categories?.map((carrier) => (
-                    <SelectItem key={carrier._id} value={carrier._id}>
-                      {carrier.name}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
-            </div>
-            <div>
-              <Label htmlFor="category">Stock</Label>
-              <Input
-                id="moq"
-                value={formData.stock}
-                onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="category">MOQ</Label>
-              <Input
-                id="moq"
-                value={formData.moq}
-                onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
-              />
-            </div>
-            <div>
-              <Label htmlFor="imageUrl">Uploaded Image URL</Label>
-              <MultiUpload onUploadComplete={handleUploadComplete} />
-              {imageUrlView.length > 0 && (
-                <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
-                  {imageUrlView.map((img, index) => (
-                    <img
-                      key={index}
-                      src={img}
-                      alt={`preview-${index}`}
-                      width={100}
-                      style={{ objectFit: "cover", borderRadius: 6 }}
-                    />
-                  ))}
+              <div>
+                <Label htmlFor="edit-description">Nutritional Information</Label>
+                <Textarea
+                  id="edit-description"
+                  value={formData.nutritionalInfo}
+                  onChange={(e) => setFormData({ ...formData, nutritionalInfo: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-description">Storage Instruction</Label>
+                <Textarea
+                  id="edit-description"
+                  value={formData.storageInstructions}
+                  onChange={(e) => setFormData({ ...formData, storageInstructions: e.target.value })}
+                />
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                <div>
+                  <Label htmlFor="price">Price in USD</Label>
+                  <Input
+                    id="priceUsd"
+                    type="number"
+                    value={formData.priceUsd}
+                    onChange={(e) => setFormData({ ...formData, priceUsd: e.target.value })}
+                    required
+                  />
                 </div>
-              )}
-            </div>
-            <div>
-              <div>
-                <Label htmlFor="imageUrl">Product Status</Label>
+                <div>
+                  <Label htmlFor="stock">Price in Naira</Label>
+                  <Input
+                    id="priceNaira"
+                    type="number"
+                    value={formData.priceNaira}
+                    onChange={(e) => setFormData({ ...formData, priceNaira: parseInt(e.target.value) })}
+                    required
+                  />
+                </div>
               </div>
               <div>
-                <Switch size="small" value={formData?.status} onChange={switchChange} />
+                <Label htmlFor="carrier">Category</Label>
+                <Select
+                  value={formData.category}
+                  onValueChange={(value) => setFormData({ ...formData, category: value })}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {categories?.map((carrier) => (
+                      <SelectItem key={carrier._id} value={carrier._id}>
+                        {carrier.name}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
+              <div>
+                <Label htmlFor="category">Stock</Label>
+                <Input
+                  id="moq"
+                  value={formData.stock}
+                  onChange={(e) => setFormData({ ...formData, stock: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="category">MOQ</Label>
+                <Input
+                  id="moq"
+                  value={formData.moq}
+                  onChange={(e) => setFormData({ ...formData, moq: e.target.value })}
+                />
+              </div>
+              <div>
+                <Label htmlFor="imageUrl">Uploaded Image URL</Label>
+                <MultiUpload onUploadComplete={handleUploadComplete} />
+                {imageUrlView.length > 0 && (
+                  <div style={{ display: "flex", gap: 10, marginTop: 10, flexWrap: "wrap" }}>
+                    {imageUrlView.map((img, index) => (
+                      <img
+                        key={index}
+                        src={img}
+                        alt={`preview-${index}`}
+                        width={100}
+                        style={{ objectFit: "cover", borderRadius: 6 }}
+                      />
+                    ))}
+                  </div>
+                )}
+              </div>
+              <div>
+                <div>
+                  <Label htmlFor="imageUrl">Product Status</Label>
+                </div>
+                <div>
+                  <Switch size="small" value={formData?.status} onChange={switchChange} />
+                </div>
 
-            </div>
-            <DialogFooter>
-              <Button type="submit" disabled={updateMutation.isPending}>
-                {updateMutation.isPending ? "Updating..." : "Update Product"}
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
-    </div>
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? "Updating..." : "Update Product"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+      </div>
     </AdminLayout >
   );
 }

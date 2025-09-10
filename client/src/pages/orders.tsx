@@ -371,17 +371,18 @@ export default function Products() {
               <div>
                 <div className="flex items-center">
                   <div className="mr-5">
-                    <label style={{ whiteSpace: 'nowrap' }}>Search By order ID, Email</label>
+                    <label style={{ whiteSpace: 'nowrap' }}>Search Orders...</label>
                     <Input
                       id="search"
                       value={searchVal}
+                      style={{ width: '300px' }}
                       placeholder="Search"
                       onChange={(e) => setSearchVal(e.target.value)}
                     />
 
                   </div>
                   <div className="mr-5">
-                    <div style={{ width: '220px' }}>
+                    <div style={{ width: '300px' }}>
                       <label style={{ whiteSpace: 'nowrap' }}>Filter By Order Status</label>
                       <Select
                         value={statusFilter}
@@ -402,7 +403,7 @@ export default function Products() {
 
                   </div>
                   <div>
-                    <div style={{ width: '220px' }}>
+                    <div style={{ width: '300px' }}>
                       <label style={{ whiteSpace: 'nowrap' }}>Filter By Payment Status</label>
 
                       <Select

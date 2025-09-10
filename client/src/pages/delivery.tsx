@@ -357,7 +357,7 @@ export default function Products() {
               <div>
                 <div className="">
                   <div className="mr-5">
-                    <label style={{ whiteSpace: 'nowrap' }}>Search By order ID, Email</label>
+                    <label style={{ whiteSpace: 'nowrap' }}>Search Deliveries..</label>
                     <Input
                       id="search"
                       value={searchVal}
