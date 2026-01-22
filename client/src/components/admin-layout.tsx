@@ -30,6 +30,7 @@ const navigation = [
   { name: "Orders", href: "/orders", icon: ShoppingBag },
   { name: "Delivery", href: "/delivery", icon: Truck },
   { name: "Delivery Setup", href: "/moderation", icon: Truck },
+  { name: "Store Locations", href: "/store-locations", icon: Truck },
 
 ];
 

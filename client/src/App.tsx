@@ -16,7 +16,7 @@ import Customers from "./pages/customers";
 import Checkout from "./pages/checkout";
 import Categories from "./pages/categories";
 import Moderations from "./pages/moderation";
-
+import StoreLocations from "./pages/store-locations"
 function Router() {
   const { isAuthenticated, isLoading } = useAuth();
 
@@ -36,6 +36,7 @@ function Router() {
 
           <Route path="/" component={Orders} />
           <Route path="/moderation" component={Moderations} />
+                    <Route path="/store-locations" component={StoreLocations} />
           <Route path="/products" component={Products} />
           <Route path="/orders" component={Orders} />
           <Route path="/delivery" component={Delivery} />
