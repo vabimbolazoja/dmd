@@ -327,6 +327,21 @@ export default function Products() {
     );
   }
 
+  function formatCurrency(
+  amount: number | string | null | undefined,
+  currency: "USD" | "NGN" | "GBP" | "CAD",
+  locale: string
+): string {
+  if (amount == null) return "…";
+  const value = typeof amount === "string" ? parseFloat(String(amount)) : amount;
+  if (Number.isNaN(value)) return "—";
+  return new Intl.NumberFormat(locale, {
+    style: "currency",
+    currency,
+    minimumFractionDigits: 2,
+  }).format(value);
+}
+
 
 
 
@@ -569,10 +584,10 @@ export default function Products() {
                         </div>
                       </TableCell>
                       <TableCell>{product.category?.name}</TableCell>
-                      <TableCell>N{product.priceNaira}</TableCell>
-                      <TableCell>USD{product.priceUsd}</TableCell>
-                      <TableCell>USD{product.priceGbp}</TableCell>
-                      <TableCell>CAD{product.priceCanada}</TableCell>
+                      <TableCell>N{formatCurrency(product.priceNaira)}</TableCell>
+                      <TableCell>USD{formatCurrency(product.priceUsd)}</TableCell>
+                      <TableCell>GBP{formatCurrency(product.priceGbp)}</TableCell>
+                      <TableCell>CAD{formatCurrency(product.priceCanada)}</TableCell>
                       <TableCell>{product.stock ? product?.stock : 0}</TableCell>
                       <TableCell>{product.moq}</TableCell>
                       <TableCell>
