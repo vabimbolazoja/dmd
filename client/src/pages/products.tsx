@@ -69,6 +69,8 @@ export default function Products() {
     priceUsd: "",
     priceNaira: "",
     category: "",
+    priceGbp: "",
+    priceCanada: "",
     status: false,
     stock: "",
     moq: 0,
@@ -84,6 +86,8 @@ export default function Products() {
       price: "",
       category: "",
       imageUrls: "",
+      priceGbp: "",
+      priceCanada: "",
       stock: "",
       status: false,
       nutritionalInfo: "",
@@ -297,6 +301,8 @@ export default function Products() {
       description: product.description,
       priceUsd: product.priceUsd,
       priceNaira: product?.priceNaira,
+      priceGbp: product.priceGbp,
+      priceCanada: product.priceCanada,
       nutritionalInfo: product?.nutritionalInfo,
       stock: product?.stock,
       storageInstructions: product?.storageInstructions,
@@ -404,6 +410,26 @@ export default function Products() {
                       required
                     />
                   </div>
+                  <div>
+                    <Label htmlFor="stock">Price in GBP</Label>
+                    <Input
+                      id="priceNaira"
+                      type="number"
+                      value={formData.priceGbp}
+                      onChange={(e) => setFormData({ ...formData, priceGbp: parseInt(e.target.value) })}
+                      required
+                    />
+                  </div>
+                  <div>
+                    <Label htmlFor="stock">Price in Canada</Label>
+                    <Input
+                      id="priceNaira"
+                      type="number"
+                      value={formData.priceCanada}
+                      onChange={(e) => setFormData({ ...formData, priceCanada: parseInt(e.target.value) })}
+                      required
+                    />
+                  </div>
                 </div>
                 <div>
                   <div>
@@ -492,7 +518,7 @@ export default function Products() {
                           <SelectValue placeholder="Select" />
                         </SelectTrigger>
                         <SelectContent>
-                          {['Active', 'Inactive','Low Stock']?.map((cont) => (
+                          {['Active', 'Inactive', 'Low Stock']?.map((cont) => (
                             <SelectItem key={cont} value={cont}>
                               {cont}
                             </SelectItem>
@@ -518,6 +544,9 @@ export default function Products() {
                     <TableHead>Category</TableHead>
                     <TableHead>Price(N)</TableHead>
                     <TableHead>Price($)</TableHead>
+                    <TableHead>Price(GB)</TableHead>
+                    <TableHead>Price(CA)</TableHead>
+
                     <TableHead>Stock</TableHead>
                     <TableHead>Moq</TableHead>
                     <TableHead>Status</TableHead>
@@ -541,7 +570,9 @@ export default function Products() {
                       </TableCell>
                       <TableCell>{product.category?.name}</TableCell>
                       <TableCell>N{product.priceNaira}</TableCell>
-                      <TableCell>${product.priceUsd}</TableCell>
+                      <TableCell>USD{product.priceUsd}</TableCell>
+                      <TableCell>USD{product.priceGbp}</TableCell>
+                      <TableCell>CAD{product.priceCanada}</TableCell>
                       <TableCell>{product.stock ? product?.stock : 0}</TableCell>
                       <TableCell>{product.moq}</TableCell>
                       <TableCell>
@@ -653,6 +684,26 @@ export default function Products() {
                     type="number"
                     value={formData.priceNaira}
                     onChange={(e) => setFormData({ ...formData, priceNaira: parseInt(e.target.value) })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="stock">Price in GBP</Label>
+                  <Input
+                    id="priceNaira"
+                    type="number"
+                    value={formData.priceGbp}
+                    onChange={(e) => setFormData({ ...formData, priceGbp: parseInt(e.target.value) })}
+                    required
+                  />
+                </div>
+                <div>
+                  <Label htmlFor="stock">Price in Canada</Label>
+                  <Input
+                    id="priceNaira"
+                    type="number"
+                    value={formData.priceCanada}
+                    onChange={(e) => setFormData({ ...formData, priceCanada: parseInt(e.target.value) })}
                     required
                   />
                 </div>
