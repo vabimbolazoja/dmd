@@ -327,21 +327,14 @@ export default function Products() {
     );
   }
 
-  function formatCurrency(
-  amount: number | string | null | undefined,
-  currency: "USD" | "NGN" | "GBP" | "CAD",
-  locale: string
-): string {
-  if (amount == null) return "…";
-  const value = typeof amount === "string" ? parseFloat(String(amount)) : amount;
-  if (Number.isNaN(value)) return "—";
-  return new Intl.NumberFormat(locale, {
-    style: "currency",
-    currency,
-    minimumFractionDigits: 2,
-  }).format(value);
-}
+  const formatCurrency = (value) => {
+  if (value === null || value === undefined || value === "") return "";
 
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(Number(value));
+};
 
 
 
