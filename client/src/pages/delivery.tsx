@@ -592,7 +592,7 @@ export default function Products() {
                     <div className="flex justify-between">
                       <span className="text-slate-600">Subtotal</span>
                       <span className="font-medium">
-                        {order?.paymentType === 'NGN' ? 'N' : order?.paymentType === 'GBP' ? '₤' : product?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt || order?.totalAmt}
+                        {order?.paymentType === 'NGN' ? 'N' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt || order?.totalAmt}
                       </span>
                     </div>
 

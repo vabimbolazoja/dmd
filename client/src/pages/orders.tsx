@@ -311,6 +311,17 @@ export default function Products() {
   }
 
 
+  const formatCurrency = (value) => {
+  if (value === null || value === undefined || value === "") return "";
+
+  return new Intl.NumberFormat("en-US", {
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
+  }).format(Number(value));
+};
+
+
+
   const handleUploadComplete = (urls: string[]) => {
     setImageUrls(urls)
     setFormData({ ...formData, imageUrls: urls })
