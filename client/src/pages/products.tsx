@@ -146,6 +146,8 @@ export default function Products() {
   const createMutation = useMutation({
     mutationFn: (data: typeof formData) => apiRequest("POST", base_url + "/api/admin/product", data),
     onSuccess: () => {
+          refetch();
+
       queryClient.invalidateQueries({ queryKey: [base_url + "/api/products"] });
       toast({
         title: "Success",
@@ -181,6 +183,7 @@ export default function Products() {
     mutationFn: ({ id, data }: { id: string; data: Partial<typeof formData> }) =>
       apiRequest("PUT", `${base_url}/api/admin/product/${id}`, data),
     onSuccess: () => {
+          refetch();
       queryClient.invalidateQueries({ queryKey: [base_url + "/api/products"] });
       setEditingProduct(null);
       resetForm();
@@ -577,10 +580,10 @@ export default function Products() {
                         </div>
                       </TableCell>
                       <TableCell>{product.category?.name}</TableCell>
-                      <TableCell>N{formatCurrency(product.priceNaira)}</TableCell>
-                      <TableCell>USD{formatCurrency(product.priceUsd)}</TableCell>
-                      <TableCell>GBP{formatCurrency(product.priceGbp)}</TableCell>
-                      <TableCell>CAD{formatCurrency(product.priceCanada)}</TableCell>
+                      <TableCell>₦{formatCurrency(product.priceNaira)}</TableCell>
+                      <TableCell>${formatCurrency(product.priceUsd)}</TableCell>
+                      <TableCell>₤{formatCurrency(product.priceGbp)}</TableCell>
+                      <TableCell>C${formatCurrency(product.priceCanada)}</TableCell>
                       <TableCell>{product.stock ? product?.stock : 0}</TableCell>
                       <TableCell>{product.moq}</TableCell>
                       <TableCell>
