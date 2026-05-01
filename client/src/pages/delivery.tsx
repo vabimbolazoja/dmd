@@ -396,7 +396,7 @@ export default function Products() {
                       <TableCell>{product.ref}</TableCell>
 
                       <TableCell>{product.userEmail}</TableCell>
-                      <TableCell>{product?.paymentType === 'NGN' ? 'N' : '$'}{product.totalAmt}</TableCell>
+                      <TableCell>{product?.paymentType === 'NGN' ? 'N' : product?.paymentType === 'GBP' ? '₤' : product?.paymentType === 'CAD' ? 'C$' : '$'}{product.totalAmt}</TableCell>
 
                       <TableCell>
                         <Badge variant={product.paymentStatus === 'PAID' ? "default" : "secondary"}>
@@ -573,7 +573,7 @@ export default function Products() {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-slate-900">
-                          {order.paymentType === 'USD' ? '$' : '₦'}{item.price}
+                          {order?.paymentType === 'NGN' ? 'N' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{item.price}
                         </p>
                         <p className="text-sm text-slate-600">each</p>
                       </div>
@@ -592,14 +592,14 @@ export default function Products() {
                     <div className="flex justify-between">
                       <span className="text-slate-600">Subtotal</span>
                       <span className="font-medium">
-                        {order?.paymentType === 'USD' ? '$' : '₦'}{order?.totalAmt || order?.totalAmt}
+                        {order?.paymentType === 'NGN' ? 'N' : order?.paymentType === 'GBP' ? '₤' : product?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt || order?.totalAmt}
                       </span>
                     </div>
 
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>{order?.paymentType === 'USD' ? '$' : '₦'}{order?.totalAmt}</span>
+                      <span>{order?.paymentType === 'NGN' ? 'N' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt}</span>
                     </div>
                   </div>
 
