@@ -573,7 +573,7 @@ export default function Products() {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-slate-900">
-                          {order?.paymentType === 'NGN' ? 'N' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{item.price}
+                          {order?.paymentType === 'NGN' ? '₦' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{item.price}
                         </p>
                         <p className="text-sm text-slate-600">each</p>
                       </div>
@@ -592,14 +592,14 @@ export default function Products() {
                     <div className="flex justify-between">
                       <span className="text-slate-600">Subtotal</span>
                       <span className="font-medium">
-                        {order?.paymentType === 'NGN' ? 'N' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt || order?.totalAmt}
+                        {order?.paymentType === 'NGN' ? '₦' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt || order?.totalAmt}
                       </span>
                     </div>
 
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>{order?.paymentType === 'NGN' ? 'N' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt}</span>
+                      <span>{order?.paymentType === 'NGN' ? '₦' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt}</span>
                     </div>
                   </div>
 
