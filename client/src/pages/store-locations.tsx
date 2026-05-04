@@ -287,7 +287,7 @@ export default function Products() {
                                             <SelectValue placeholder="Select a country" />
                                         </SelectTrigger>
                                         <SelectContent>
-                                            {['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS']?.map((cont) => (
+                                            {['NIGERIA', 'USA', 'CANADA', 'UNITED KINGDON']?.map((cont) => (
                                                 <SelectItem key={cont} value={cont}>
                                                     {cont}
                                                 </SelectItem>
@@ -455,7 +455,7 @@ export default function Products() {
                                         <SelectValue placeholder="Select a country" />
                                     </SelectTrigger>
                                     <SelectContent>
-                                        {['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS']?.map((cont) => (
+                                        {['NIGERIA', 'USA', 'CANADA', 'UNITED KINGDON']?.map((cont) => (
                                             <SelectItem key={cont} value={cont}>
                                                 {cont}
                                             </SelectItem>
