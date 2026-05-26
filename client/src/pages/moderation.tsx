@@ -62,7 +62,7 @@ const emptyFormData: ModerationFormData = {
     maxqty: "",
 };
 
-const COUNTRIES = ['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS'] as const;
+const COUNTRIES = ['NIGERIA', 'USA', 'CANADA', 'UNITED KINGDOM'] as const;
 
 function toPayload(data: ModerationFormData) {
     return {
