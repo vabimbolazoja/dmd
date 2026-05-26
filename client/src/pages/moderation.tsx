@@ -6,16 +6,11 @@ import { isUnauthorizedError } from "@/lib/authUtils";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import AdminLayout from "@/components/admin-layout";
 import { Button } from "@/components/ui/button";
-import type { Product } from "@shared/schema";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Textarea } from "@/components/ui/textarea";
-import { Pagination } from "antd";
-import { Badge } from "@/components/ui/badge";
 import moment from 'moment'
 import { base_url } from "../config";
-import { Switch } from 'antd'
 import {
     Select,
     SelectContent,
@@ -40,40 +35,126 @@ import {
     TableHeader,
     TableRow,
 } from "@/components/ui/table";
-import { Plus, Package, Edit, Trash2 } from "lucide-react";
-import MultiUpload from "../components/ui/multiupload"
-interface Product {
-    id: string;
-    name: string;
-    description: string;
-    price: string;
-    imageUrl: string;
-    category: string;
-    stock: number;
-    isActive: boolean;
+import { Plus, Package, Edit } from "lucide-react";
+
+interface ModerationConfig {
+    _id?: string;
+    id?: string;
+    country: string;
+    deliveryPriceInKg: number | string;
+    increment_percentage: number | string;
+    maxqty: number | string;
+    createdAt?: string;
+    updatedAt?: string;
 }
 
-export default function Products() {
+type ModerationFormData = {
+    country: string;
+    deliveryPriceInKg: string;
+    increment_percentage: string;
+    maxqty: string;
+};
+
+const emptyFormData: ModerationFormData = {
+    country: "",
+    deliveryPriceInKg: "",
+    increment_percentage: "",
+    maxqty: "",
+};
+
+const COUNTRIES = ['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS'] as const;
+
+function toPayload(data: ModerationFormData) {
+    return {
+        country: data.country,
+        deliveryPriceInKg: Number(data.deliveryPriceInKg),
+        increment_percentage: Number(data.increment_percentage),
+        maxqty: Number(data.maxqty),
+    };
+}
+
+function ModerationFormFields({
+    formData,
+    setFormData,
+    countryDisabled = false,
+}: {
+    formData: ModerationFormData;
+    setFormData: React.Dispatch<React.SetStateAction<ModerationFormData>>;
+    countryDisabled?: boolean;
+}) {
+    return (
+        <>
+            <div>
+                <Label htmlFor="country">Select Country</Label>
+                <Select
+                    value={formData.country}
+                    onValueChange={(value) => setFormData({ ...formData, country: value })}
+                    required
+                    disabled={countryDisabled}
+                >
+                    <SelectTrigger>
+                        <SelectValue placeholder="Select a country" />
+                    </SelectTrigger>
+                    <SelectContent>
+                        {COUNTRIES.map((cont) => (
+                            <SelectItem key={cont} value={cont}>
+                                {cont}
+                            </SelectItem>
+                        ))}
+                    </SelectContent>
+                </Select>
+            </div>
+
+            <div>
+                <Label htmlFor="deliveryPriceInKg">Delivery Price (0.01g – 1kg)</Label>
+                <Input
+                    id="deliveryPriceInKg"
+                    type="number"
+                    step="any"
+                    value={formData.deliveryPriceInKg}
+                    onChange={(e) => setFormData({ ...formData, deliveryPriceInKg: e.target.value })}
+                    required
+                />
+            </div>
+
+            <div>
+                <Label htmlFor="increment_percentage">Increment Percentage</Label>
+                <Input
+                    id="increment_percentage"
+                    type="number"
+                    step="any"
+                    value={formData.increment_percentage}
+                    onChange={(e) => setFormData({ ...formData, increment_percentage: e.target.value })}
+                    required
+                />
+            </div>
+
+            <div>
+                <Label htmlFor="maxqty">Max Quantity</Label>
+                <Input
+                    id="maxqty"
+                    type="number"
+                    step="1"
+                    min="0"
+                    value={formData.maxqty}
+                    onChange={(e) => setFormData({ ...formData, maxqty: e.target.value })}
+                    required
+                />
+            </div>
+        </>
+    );
+}
+
+export default function Moderations() {
     const { toast } = useToast();
     const { isAuthenticated, isLoading } = useAuth();
     const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
-    const [page, setPage] = useState(1)
-    const [limit, setLimit] = useState(10)
-    const [imageUrlView, setImageurlView] = useState("")
-    const [imageUrls, setImageUrls] = useState<string[]>([]);
-    const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-    const [formData, setFormData] = useState({
-        country: "",
-        deliveryPriceInKg: "",
-    });
+    const [editingProduct, setEditingProduct] = useState<ModerationConfig | null>(null);
+    const [formData, setFormData] = useState<ModerationFormData>(emptyFormData);
 
     const resetForm = () => {
-        setFormData({
-            country: "",
-            deliveryPriceInKg: "",
-        });
+        setFormData(emptyFormData);
     };
-
 
     useEffect(() => {
         if (!isLoading && !isAuthenticated) {
@@ -89,12 +170,10 @@ export default function Products() {
         }
     }, [isAuthenticated, isLoading, toast]);
 
-    const { data: products, isLoading: productsLoading, error, refetch } = useQuery<Product[]>({
+    const { data: products, isLoading: productsLoading, error } = useQuery<ModerationConfig[]>({
         queryKey: [base_url + `/api/moderations/config`],
         retry: false,
     });
-
-
 
     useEffect(() => {
         if (error && isUnauthorizedError(error as Error)) {
@@ -115,10 +194,9 @@ export default function Products() {
         }
     }, [isAddDialogOpen])
 
-
-
     const createMutation = useMutation({
-        mutationFn: (data: typeof formData) => apiRequest("PUT", base_url + `/api/moderations/${data?.country}`, data),
+        mutationFn: (data: ModerationFormData) =>
+            apiRequest("PUT", base_url + `/api/moderations/${data.country}`, toPayload(data)),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [base_url + "/api/moderations/config"] });
             toast({
@@ -127,10 +205,8 @@ export default function Products() {
             });
             setIsAddDialogOpen(false);
             resetForm();
-
         },
         onError: (error) => {
-            console.log(error)
             if (isUnauthorizedError(error)) {
                 toast({
                     title: "Unauthorized",
@@ -152,8 +228,8 @@ export default function Products() {
     });
 
     const updateMutation = useMutation({
-        mutationFn: ({ id, data }: { id: string; data: Partial<typeof formData> }) =>
-            apiRequest("PUT", `${base_url}/api/moderations/${data?.country}`, data),
+        mutationFn: ({ data }: { id: string; data: ModerationFormData }) =>
+            apiRequest("PUT", `${base_url}/api/moderations/${data.country}`, toPayload(data)),
         onSuccess: () => {
             queryClient.invalidateQueries({ queryKey: [base_url + "/api/moderations/config"] });
             setEditingProduct(null);
@@ -164,7 +240,6 @@ export default function Products() {
             });
         },
         onError: (error) => {
-
             if (isUnauthorizedError(error)) {
                 toast({
                     title: "Unauthorized",
@@ -183,63 +258,32 @@ export default function Products() {
             });
         },
     });
-
-    const deleteMutation = useMutation({
-        mutationFn: (id: string) => apiRequest("DELETE", `${base_url}/api/product/${id}`),
-        onSuccess: () => {
-            queryClient.invalidateQueries({ queryKey: [base_url + "/api/products"] });
-            toast({
-                title: "Success",
-                description: "Product deleted successfully",
-            });
-        },
-        onError: (error) => {
-            if (isUnauthorizedError(error)) {
-                toast({
-                    title: "Unauthorized",
-                    description: "You are logged out. Logging in again...",
-                    variant: "destructive",
-                });
-                setTimeout(() => {
-                    window.location.href = "/login";
-                }, 500);
-                return;
-            }
-            toast({
-                title: "Error",
-                description: error?.message,
-                variant: "destructive",
-            });
-        },
-    });
-
-
-
-
 
     const handleSubmit = (e: React.FormEvent) => {
         e.preventDefault();
         if (editingProduct) {
-            updateMutation.mutate({ id: editingProduct._id, data: formData });
+            updateMutation.mutate({ id: editingProduct._id ?? editingProduct.id ?? "", data: formData });
         } else {
             createMutation.mutate(formData);
         }
     };
 
-    const handleEdit = (product: Product) => {
+    const handleEdit = (product: ModerationConfig) => {
         setEditingProduct(product);
         setFormData({
-            country: product.country,
-            price: product.deliveryPriceInKg,
+            country: product.country ?? "",
+            deliveryPriceInKg: String(product.deliveryPriceInKg ?? ""),
+            increment_percentage: String(product.increment_percentage ?? ""),
+            maxqty: String(product.maxqty ?? ""),
         });
     };
 
-
+    const currencyPrefix = (country: string) =>
+        country?.toUpperCase().includes("NIGERIA") ? "N" : "$";
 
     return (
         <AdminLayout>
             <div className="p-6">
-                {/* Header */}
                 <div className="flex justify-between items-center mb-8">
                     <div>
                         <h2 className="text-2xl font-bold text-gray-900">Delivery Cost Setup</h2>
@@ -261,41 +305,7 @@ export default function Products() {
                                 </DialogDescription>
                             </DialogHeader>
                             <form onSubmit={handleSubmit} className="space-y-4">
-                                <div>
-                                    <Label htmlFor="name">Select Country</Label>
-                                    <Select
-                                        value={formData.country}
-                                        onValueChange={(value) => setFormData({ ...formData, country: value })}
-                                        required
-                                    >
-                                        <SelectTrigger>
-                                            <SelectValue placeholder="Select a country" />
-                                        </SelectTrigger>
-                                        <SelectContent>
-                                            {['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS']?.map((cont) => (
-                                                <SelectItem key={cont} value={cont}>
-                                                    {cont}
-                                                </SelectItem>
-                                            ))}
-                                        </SelectContent>
-                                    </Select>
-                                </div>
-
-
-                                <div >
-                                    <div>
-                                        <Label htmlFor="price">Price</Label>
-                                        <Input
-                                            id="price"
-                                            type="number"
-                                            value={formData.price}
-                                            onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                            required
-                                        />
-                                    </div>
-
-                                </div>
-
+                                <ModerationFormFields formData={formData} setFormData={setFormData} />
                                 <DialogFooter>
                                     <Button type="submit" disabled={createMutation.isPending}>
                                         {createMutation.isPending ? "Creating..." : "Create Delivery Setup"}
@@ -306,7 +316,6 @@ export default function Products() {
                     </Dialog>
                 </div>
 
-                {/* Products Table */}
                 <Card>
                     <CardHeader>
                         <CardTitle>Delivery Cost Setup</CardTitle>
@@ -316,48 +325,50 @@ export default function Products() {
                             <div className="flex items-center justify-center py-8">
                                 <div className="animate-spin w-8 h-8 border-4 border-primary border-t-transparent rounded-full" />
                             </div>
-                        ) : products?.length > 0 ? (
+                        ) : products && products.length > 0 ? (
                             <Table>
                                 <TableHeader>
                                     <TableRow>
                                         <TableHead>Country</TableHead>
-                                        <TableHead>Delivery Price in 0.01gram - 1kg</TableHead>
+                                        <TableHead>Delivery Price (0.01g – 1kg)</TableHead>
+                                        <TableHead>Increment %</TableHead>
+                                        <TableHead>Max Qty</TableHead>
                                         <TableHead>Date Created</TableHead>
                                         <TableHead>Last Updated</TableHead>
-
                                         <TableHead>Actions</TableHead>
                                     </TableRow>
                                 </TableHeader>
                                 <TableBody>
-                                    {products?.map((product: Product) => (
-                                        <TableRow key={product.id}>
-
+                                    {products.map((product) => (
+                                        <TableRow key={product._id ?? product.id ?? product.country}>
                                             <TableCell>{product.country}</TableCell>
-                                            <TableCell>{product?.country?.includes("Nigeria") ? "N" : "$"}{product.deliveryPriceInKg}</TableCell>
-                                            <TableCell>{product.createdAt ? moment(product.createdAt).format(
-                                                "DD-MMM-YYYY h:mm A"
-                                            ) : ""}</TableCell>
-                                            <TableCell>{product.updatedAt ? moment(product.updatedAt).format(
-                                                "DD-MMM-YYYY h:mm A"
-                                            ) : ""}</TableCell>
                                             <TableCell>
-                                                <div className="flex items-center space-x-2">
-                                                    <Button
-                                                        variant="outline"
-                                                        size="sm"
-                                                        onClick={() => handleEdit(product)}
-                                                    >
-                                                        <Edit className="h-4 w-4" />
-                                                    </Button>
-
-
-                                                </div>
+                                                {currencyPrefix(product.country)}{product.deliveryPriceInKg}
+                                            </TableCell>
+                                            <TableCell>{product.increment_percentage}%</TableCell>
+                                            <TableCell>{product.maxqty}</TableCell>
+                                            <TableCell>
+                                                {product.createdAt
+                                                    ? moment(product.createdAt).format("DD-MMM-YYYY h:mm A")
+                                                    : ""}
+                                            </TableCell>
+                                            <TableCell>
+                                                {product.updatedAt
+                                                    ? moment(product.updatedAt).format("DD-MMM-YYYY h:mm A")
+                                                    : ""}
+                                            </TableCell>
+                                            <TableCell>
+                                                <Button
+                                                    variant="outline"
+                                                    size="sm"
+                                                    onClick={() => handleEdit(product)}
+                                                >
+                                                    <Edit className="h-4 w-4" />
+                                                </Button>
                                             </TableCell>
                                         </TableRow>
                                     ))}
                                 </TableBody>
-                                <br />
-
                             </Table>
                         ) : (
                             <div className="text-center py-8 text-gray-500">
@@ -369,50 +380,20 @@ export default function Products() {
                     </CardContent>
                 </Card>
 
-                {/* Edit Dialog */}
                 <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
                     <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
                         <DialogHeader>
                             <DialogTitle>Edit Delivery Cost setup</DialogTitle>
                             <DialogDescription>
-                                Update delivery cost setup .
+                                Update delivery cost setup.
                             </DialogDescription>
                         </DialogHeader>
                         <form onSubmit={handleSubmit} className="space-y-4">
-                            <div>
-                                <Label htmlFor="name">Select Country</Label>
-                                <Select
-                                    value={formData.country}
-                                    onValueChange={(value) => setFormData({ ...formData, country: value })}
-                                    required
-                                >
-                                    <SelectTrigger>
-                                        <SelectValue placeholder="Select a country" />
-                                    </SelectTrigger>
-                                    <SelectContent>
-                                        {['NIGERIA', 'USA', 'CANADA', 'NETHERLANDS', 'OTHERS']?.map((cont) => (
-                                            <SelectItem key={cont} value={cont}>
-                                                {cont}
-                                            </SelectItem>
-                                        ))}
-                                    </SelectContent>
-                                </Select>
-                            </div>
-
-
-                            <div>
-                                <div>
-                                    <Label htmlFor="price">Price</Label>
-                                    <Input
-                                        id="price"
-                                        type="number"
-                                        value={formData.price}
-                                        onChange={(e) => setFormData({ ...formData, price: e.target.value })}
-                                        required
-                                    />
-                                </div>
-
-                            </div>
+                            <ModerationFormFields
+                                formData={formData}
+                                setFormData={setFormData}
+                                countryDisabled
+                            />
                             <DialogFooter>
                                 <Button type="submit" disabled={updateMutation.isPending}>
                                     {updateMutation.isPending ? "Updating..." : "Update Delivery Setup"}
@@ -422,6 +403,6 @@ export default function Products() {
                     </DialogContent>
                 </Dialog>
             </div>
-        </AdminLayout >
+        </AdminLayout>
     );
 }
