@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { useAuth } from "@/hooks/useAuth";
 import { useToast } from "@/hooks/use-toast";
@@ -30,7 +30,6 @@ import {
   DialogFooter,
   DialogHeader,
   DialogTitle,
-  DialogTrigger,
 } from "@/components/ui/dialog";
 import {
   Table,
@@ -42,6 +41,93 @@ import {
 } from "@/components/ui/table";
 import { Plus, Edit, Trash2 } from "lucide-react";
 import MultiUpload from "../components/ui/multiupload"
+
+const DELIVERY_STATUSES = ["PENDING", "TRANSIT", "FLAGGED", "SHIPPED", "DELIVERED", "CANCELLED", "RESCHEDULED"];
+
+const emptyDeliveryForm = {
+  name: "",
+  date: "",
+  status: "",
+  location: "",
+};
+
+type DeliveryForm = typeof emptyDeliveryForm;
+
+function toDateInputValue(value: unknown): string {
+  if (value == null || value === "") return "";
+  const raw = String(value).trim();
+  const isoPrefix = raw.match(/^(\d{4}-\d{2}-\d{2})/);
+  if (isoPrefix) return isoPrefix[1];
+  const parsed = new Date(raw);
+  if (Number.isNaN(parsed.getTime())) return "";
+  const yyyy = parsed.getFullYear();
+  const mm = String(parsed.getMonth() + 1).padStart(2, "0");
+  const dd = String(parsed.getDate()).padStart(2, "0");
+  return `${yyyy}-${mm}-${dd}`;
+}
+
+function readDelivery(record: any) {
+  const name =
+    record?.rider ||
+    record?.riderName ||
+    (record?.name && record?.name !== record?.deliveryInfo?.name ? record.name : "") ||
+    "";
+  const dateValue = record?.expectedDate || record?.expectedDeliveryDate || "";
+  const location = record?.location || "";
+  const status =
+    (typeof record?.orderStatus === "string" && record.orderStatus) ||
+    (typeof record?.status === "string" && record.status) ||
+    "";
+
+  return {
+    name,
+    date: toDateInputValue(dateValue),
+    dateLabel: dateValue ? String(dateValue) : "NA",
+    location,
+    status,
+  };
+}
+
+function formFromOrder(record: any): DeliveryForm {
+  const details = readDelivery(record);
+  return {
+    name: details.name,
+    date: details.date,
+    location: details.location,
+    status: DELIVERY_STATUSES.includes(details.status) ? details.status : "",
+  };
+}
+
+function withSavedDelivery(record: any, saved: DeliveryForm) {
+  if (!record) return record;
+  return {
+    ...record,
+    rider: saved.name || record.rider,
+    expectedDate: saved.date || record.expectedDate,
+    location: saved.location || record.location,
+    orderStatus: saved.status || record.orderStatus,
+  };
+}
+
+function patchDeliveryOrders(id: string, saved: DeliveryForm) {
+  queryClient.setQueriesData(
+    {
+      predicate: (query) =>
+        typeof query.queryKey?.[0] === "string" &&
+        String(query.queryKey[0]).includes("/api/admin/orders-delivery"),
+    },
+    (current: any) => {
+      if (!current?.orders) return current;
+      return {
+        ...current,
+        orders: current.orders.map((item: any) =>
+          item?._id === id ? withSavedDelivery(item, saved) : item
+        ),
+      };
+    }
+  );
+}
+
 interface Product {
   id: string;
   name: string;
@@ -59,32 +145,17 @@ export default function Products() {
   const [isAddDialogOpen, setIsAddDialogOpen] = useState(false);
   const [searchVal,setSearchVal] = useState("")
   const [imageUrls, setImageUrls] = useState<string[]>([]);
-  const [editingProduct, setEditingProduct] = useState<Product | null>(null);
-  const [order, setOrder] = useState(null);
+  const [editingProduct, setEditingProduct] = useState<any>(null);
+  const [order, setOrder] = useState<any>(null);
   const [prodId,setProdId] = useState("")
   const [page, setPage] = useState(1)
   const [limit, setLimit] = useState(10)
 
-  const [formData, setFormData] = useState({
-    name: "",
-    date: "",
-    status: "",
-    location: "",
- 
-  });
+  const [formData, setFormData] = useState<DeliveryForm>(emptyDeliveryForm);
+  const deliveryEdits = useRef<Record<string, DeliveryForm>>({});
 
   const resetForm = () => {
-    setFormData({
-      name: "",
-      description: "",
-      price: "",
-      category: "",
-      stock: 0,
-      imageUrls: "",
-      status: false,
-      nutritionalInfo: "",
-      storageInstructions: "",
-    });
+    setFormData(emptyDeliveryForm);
   };
 
 
@@ -121,12 +192,6 @@ export default function Products() {
       }, 500);
     }
   }, [error, toast]);
-
-  useEffect(() => {
-    if (isAddDialogOpen) {
-      resetForm()
-    }
-  }, [isAddDialogOpen])
 
   const getStatusColor = (status: any) => {
     switch (status) {
@@ -194,12 +259,23 @@ export default function Products() {
   });
 
   const updateMutation = useMutation({
-    mutationFn: ({ id, data }: { id: string; data: Partial<typeof formData> }) =>
-      apiRequest("PUT", `${base_url}/api/admin/orders-delivery-address/${prodId}`, data),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [base_url + "/api/admin/orders-delivery"] });
-      setEditingProduct(null);
-      setIsAddDialogOpen(false)
+    mutationFn: ({ id, data }: { id: string; data: DeliveryForm }) =>
+      apiRequest("PUT", `${base_url}/api/admin/orders-delivery-address/${id}`, data),
+    onSuccess: async (_response, variables) => {
+      try {
+        await refetch();
+      } catch (refetchError) {
+        console.error(refetchError);
+      }
+      deliveryEdits.current[variables.id] = variables.data;
+      patchDeliveryOrders(variables.id, variables.data);
+      setOrder((current: any) =>
+        current?._id === variables.id ? withSavedDelivery(current, variables.data) : current
+      );
+      setEditingProduct((current: any) =>
+        current?._id === variables.id ? withSavedDelivery(current, variables.data) : current
+      );
+      setIsAddDialogOpen(false);
       resetForm();
       toast({
         title: "Success",
@@ -269,18 +345,21 @@ export default function Products() {
   };
 
 
-  const handleSubmit = (e: React.FormEvent, id?: string) => {
+  const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    console.log(id)
-    if (id) {
-      updateMutation.mutate({ id, data: formData });
-    } 
+    if (!prodId) return;
+    updateMutation.mutate({ id: prodId, data: formData });
   };
 
-  const handleEdit = (product: Product) => {
-    setEditingProduct(product);
-    setOrder(product)
+  const openDeliveryUpdate = (product: any) => {
+    setProdId(product?._id || "");
+    setFormData(formFromOrder(product));
+    setIsAddDialogOpen(true);
+  };
 
+  const handleEdit = (product: any) => {
+    setEditingProduct(product);
+    setOrder(product);
   };
 
   
@@ -301,7 +380,11 @@ export default function Products() {
     );
   }
 
-  const products = data?.orders || [];
+  const products = (data?.orders || []).map((item: any) => {
+    const saved = deliveryEdits.current[item?._id];
+    return saved ? withSavedDelivery(item, saved) : item;
+  });
+  const selectedOrder = products.find((item: any) => item?._id === editingProduct?._id) || order;
   const totalPages = data?.totalPages * 10 || 10;
   const currentPage = data?.page || 1;
 
@@ -412,85 +495,13 @@ export default function Products() {
 
                       <TableCell>
                         <div className="flex items-center space-x-2">
-                          <Dialog open={isAddDialogOpen} onOpenChange={() => {
-                            setProdId(product?._id)
-                            setIsAddDialogOpen(!isAddDialogOpen)
-                          }}>
-                            <DialogTrigger asChild>
-                            <Button
+                          <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => openDeliveryUpdate(product)}
                           >
                             Update Delivery
                           </Button>
-                            </DialogTrigger>
-                            <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
-                              <DialogHeader>
-                                <DialogTitle>Update Customer Order Delivery</DialogTitle>
-                                <DialogDescription>
-                                  update the customer order delivery so cutomer can get real time update regarding thier order
-                                </DialogDescription>
-                              </DialogHeader>
-                              <form onSubmit={(e) => handleSubmit(e, product?._id)} className="space-y-4">
-                                <div>
-                                  <Label htmlFor="name">Rider Name</Label>
-                                  <Input
-                                    id="name"
-                                    value={formData.name}
-                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                                    required
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="description">Expected Delivery Date</Label>
-                                  <Input
-                                    id="date"
-                                    type="date"
-                                    value={formData.date}
-                                    onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-                                    required
-                                  />
-                                </div>
-                                <div>
-                                  <Label htmlFor="edit-description">Current Location</Label>
-                                  <Input
-                                    id="location"
-                                    value={formData.location}
-                                    onChange={(e) => setFormData({ ...formData, location: e.target.value })}
-                                    required
-                                  />
-                                </div>
-                             
-                                <div>
-                                  <div>
-                                    <Label htmlFor="carrier">Status</Label>
-                                    <Select
-                                      value={formData.status}
-                                      onValueChange={(value) => setFormData({ ...formData, status: value })}
-                                      required
-                                    >
-                                      <SelectTrigger>
-                                        <SelectValue placeholder="Select a category" />
-                                      </SelectTrigger>
-                                      <SelectContent>
-                                        {['PENDING','TRANSIT','FLAGGED','SHIPPED','DELIVERED','CANCELLED','RESCHEDULED']?.map((carrier) => (
-                                          <SelectItem key={carrier} value={carrier}>
-                                            {carrier}
-                                          </SelectItem>
-                                        ))}
-                                      </SelectContent>
-                                    </Select>
-                                  </div>
-                                </div>
-                              
-                                <DialogFooter>
-                                  <Button type="submit" disabled={updateMutation.isPending}>
-                                    {updateMutation.isPending ? "Submitting..." : "Submit"}
-                                  </Button>
-                                </DialogFooter>
-                              </form>
-                            </DialogContent>
-                          </Dialog>
                           <Button
                             variant="outline"
                             size="sm"
@@ -498,9 +509,6 @@ export default function Products() {
                           >
                             Details
                           </Button>
-                        
-
-
                         </div>
                       </TableCell>
                     </TableRow>
@@ -526,6 +534,77 @@ export default function Products() {
           </CardContent>
         </Card>
 
+        <Dialog
+          open={isAddDialogOpen}
+          onOpenChange={(open) => {
+            setIsAddDialogOpen(open);
+            if (!open) resetForm();
+          }}
+        >
+          <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Update Customer Order Delivery</DialogTitle>
+              <DialogDescription>
+                update the customer order delivery so cutomer can get real time update regarding thier order
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <Label htmlFor="name">Rider Name</Label>
+                <Input
+                  id="name"
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="description">Expected Delivery Date</Label>
+                <Input
+                  id="date"
+                  type="date"
+                  value={formData.date}
+                  onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="edit-description">Current Location</Label>
+                <Input
+                  id="location"
+                  value={formData.location}
+                  onChange={(e) => setFormData({ ...formData, location: e.target.value })}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="carrier">Status</Label>
+                <Select
+                  value={formData.status}
+                  onValueChange={(value) => setFormData({ ...formData, status: value })}
+                  required
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select a category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {DELIVERY_STATUSES.map((carrier) => (
+                      <SelectItem key={carrier} value={carrier}>
+                        {carrier}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={updateMutation.isPending}>
+                  {updateMutation.isPending ? "Submitting..." : "Submit"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
+
         {/* Edit Dialog */}
         <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
           <DialogContent customWidth="900px" className="max-h-[90vh] overflow-y-auto">
@@ -539,15 +618,15 @@ export default function Products() {
               <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 p-4 bg-slate-50 rounded-lg">
                 <div>
                   <div className="flex items-center gap-2 mb-1">
-                    <Badge className={`${getStatusColor(order?.orderStatus)}`}>
+                    <Badge className={`${getStatusColor(selectedOrder?.orderStatus)}`}>
                       <div className="flex items-center">
-                        {getStatusIcon(order?.orderStatus)}
-                        <span className="ml-1 capitalize">{order?.orderStatus}</span>
+                        {getStatusIcon(selectedOrder?.orderStatus)}
+                        <span className="ml-1 capitalize">{selectedOrder?.orderStatus}</span>
                       </div>
                     </Badge>
                   </div>
                   <p className="text-sm text-slate-600">
-                    Order placed on {new Date(order?.createdAt).toLocaleDateString('en-US', {
+                    Order placed on {new Date(selectedOrder?.createdAt).toLocaleDateString('en-US', {
                       year: 'numeric',
                       month: 'long',
                       day: 'numeric'
@@ -560,7 +639,7 @@ export default function Products() {
               <div>
                 <h3 className="text-lg font-semibold text-slate-900 mb-4">Items Ordered</h3>
                 <div className="space-y-4">
-                  {order?.orders.map((item) => (
+                  {selectedOrder?.orders.map((item) => (
                     <div key={item.prod_id} className="flex items-center gap-4 p-4 border border-slate-200 rounded-lg">
                       <img
                         src={item.image}
@@ -573,7 +652,7 @@ export default function Products() {
                       </div>
                       <div className="text-right">
                         <p className="font-semibold text-slate-900">
-                          {order?.paymentType === 'NGN' ? '₦' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{item.price}
+                          {selectedOrder?.paymentType === 'NGN' ? '₦' : selectedOrder?.paymentType === 'GBP' ? '₤' : selectedOrder?.paymentType === 'CAD' ? 'C$' : '$'}{item.price}
                         </p>
                         <p className="text-sm text-slate-600">each</p>
                       </div>
@@ -592,14 +671,14 @@ export default function Products() {
                     <div className="flex justify-between">
                       <span className="text-slate-600">Subtotal</span>
                       <span className="font-medium">
-                        {order?.paymentType === 'NGN' ? '₦' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt || order?.totalAmt}
+                        {selectedOrder?.paymentType === 'NGN' ? '₦' : selectedOrder?.paymentType === 'GBP' ? '₤' : selectedOrder?.paymentType === 'CAD' ? 'C$' : '$'}{selectedOrder?.totalAmt || selectedOrder?.totalAmt}
                       </span>
                     </div>
 
                     <Separator />
                     <div className="flex justify-between text-lg font-bold">
                       <span>Total</span>
-                      <span>{order?.paymentType === 'NGN' ? '₦' : order?.paymentType === 'GBP' ? '₤' : order?.paymentType === 'CAD' ? 'C$' : '$'}{order?.totalAmt}</span>
+                      <span>{selectedOrder?.paymentType === 'NGN' ? '₦' : selectedOrder?.paymentType === 'GBP' ? '₤' : selectedOrder?.paymentType === 'CAD' ? 'C$' : '$'}{selectedOrder?.totalAmt}</span>
                     </div>
                   </div>
 
@@ -613,19 +692,19 @@ export default function Products() {
 
                 <div>
                   <h3 className="text-lg font-semibold text-slate-900 mb-4">Customer Information</h3>
-                  {order?.deliveryInfo && (
+                  {selectedOrder?.deliveryInfo && (
                     <div className="space-y-3">
                       <div className="flex items-center gap-2">
                         <Package className="h-4 w-4 text-slate-600" />
-                        <span className="text-slate-600">{order?.deliveryInfo.name}</span>
+                        <span className="text-slate-600">{selectedOrder?.deliveryInfo.name}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Mail className="h-4 w-4 text-slate-600" />
-                        <span className="text-slate-600">{order?.deliveryInfo.email}</span>
+                        <span className="text-slate-600">{selectedOrder?.deliveryInfo.email}</span>
                       </div>
                       <div className="flex items-center gap-2">
                         <Phone className="h-4 w-4 text-slate-600" />
-                        <span className="text-slate-600">{order?.deliveryInfo.phone}</span>
+                        <span className="text-slate-600">{selectedOrder?.deliveryInfo.phone}</span>
                       </div>
                     </div>
                   )}
@@ -634,7 +713,7 @@ export default function Products() {
                     <h4 className="font-semibold text-slate-900 mb-2">Shipping Address</h4>
                     <div className="flex items-start gap-2">
                       <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                      <span className="text-slate-600">{order?.deliveryInfo?.address}</span>
+                      <span className="text-slate-600">{selectedOrder?.deliveryInfo?.address}</span>
                     </div>
                   </div>
                   <Separator />
@@ -642,19 +721,19 @@ export default function Products() {
                     <h4 className="font-semibold text-slate-900 mb-2">Delivery Details</h4>
                     <div className="flex items-start gap-2">
                       <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                      <span className="text-slate-600">Rider Name - {order?.rider ?? 'NA'}</span>
+                      <span className="text-slate-600">Rider Name - {readDelivery(selectedOrder).name || "NA"}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                      <span className="text-slate-600">Expected Delivery Date- {order?.expectedDate ?? 'NA'}</span>
+                      <span className="text-slate-600">Expected Delivery Date- {readDelivery(selectedOrder).dateLabel}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                      <span className="text-slate-600">Current Location- {order?.location ?? 'NA'}</span>
+                      <span className="text-slate-600">Current Location- {readDelivery(selectedOrder).location || "NA"}</span>
                     </div>
                     <div className="flex items-start gap-2">
                       <MapPin className="h-4 w-4 text-slate-600 mt-0.5" />
-                      <span className="text-slate-600">Status- {order?.orderStatus ?? 'NA'}</span>
+                      <span className="text-slate-600">Status- {readDelivery(selectedOrder).status || "NA"}</span>
                     </div>
                   </div>
                 </div>
