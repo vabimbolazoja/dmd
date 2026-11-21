@@ -39,7 +39,21 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import { Plus, Package, Edit, Trash2 } from "lucide-react";
+import { Plus, Package, Edit, Trash2, Globe } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
+
+const COUNTRIES = [
+  { label: "Nigeria", field: "availableInNigeria" },
+  { label: "United States", field: "availableInUsa" },
+  { label: "Canada", field: "availableInCanada" },
+  { label: "United Kingdom", field: "availableInUk" },
+  { label: "Netherlands", field: "availableInNetherlands" },
+] as const;
+
+const availabilityFromProduct = (product: any) =>
+  Object.fromEntries(
+    COUNTRIES.map(({ field }) => [field, product?.[field] !== false])
+  ) as Record<(typeof COUNTRIES)[number]["field"], boolean>;
 import MultiUpload from "../components/ui/multiupload"
 interface Product {
   id: string;
@@ -63,6 +77,11 @@ export default function Products() {
   const [prodFilter, setProdFilter] = useState("")
   const [searchVal, setSearchVal] = useState("")
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
+  const [detailsProduct, setDetailsProduct] = useState<any>(null);
+  const [detailsOpen, setDetailsOpen] = useState(false);
+  const [stockProduct, setStockProduct] = useState<any>(null);
+  const [stockOpen, setStockOpen] = useState(false);
+  const [countryChecks, setCountryChecks] = useState(availabilityFromProduct(null));
   const [formData, setFormData] = useState({
     name: "",
     description: "",
@@ -294,6 +313,53 @@ export default function Products() {
     } else {
       createMutation.mutate(formData);
     }
+  };
+
+  const availabilityMutation = useMutation({
+    mutationFn: ({ id, data }: { id: string; data: Record<string, boolean> }) =>
+      apiRequest("PUT", `${base_url}/api/admin/product/${id}/availability`, data),
+    onSuccess: () => {
+      refetch();
+      setStockOpen(false);
+      toast({
+        title: "Success",
+        description: "Country availability updated",
+      });
+    },
+    onError: (error) => {
+      if (isUnauthorizedError(error)) {
+        toast({
+          title: "Unauthorized",
+          description: "You are logged out. Logging in again...",
+          variant: "destructive",
+        });
+        setTimeout(() => {
+          window.location.href = "/login";
+        }, 500);
+        return;
+      }
+      toast({
+        title: "Error",
+        description: error?.message,
+        variant: "destructive",
+      });
+    },
+  });
+
+  const openCountryStock = (product: any) => {
+    setStockProduct(product);
+    setCountryChecks(availabilityFromProduct(product));
+    setStockOpen(true);
+  };
+
+  const handleAvailabilitySubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    const id = stockProduct?._id || stockProduct?.id;
+    if (!id) return;
+    const payload = Object.fromEntries(
+      COUNTRIES.map(({ field }) => [field, Boolean(countryChecks[field])])
+    );
+    availabilityMutation.mutate({ id, data: payload });
   };
 
   const handleEdit = (product: Product) => {
@@ -603,6 +669,25 @@ export default function Products() {
                           <Button
                             variant="outline"
                             size="sm"
+                            onClick={() => {
+                              setDetailsProduct(product);
+                              setDetailsOpen(true);
+                            }}
+                          >
+                            Details
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            title="Update country stock"
+                            aria-label="Update country stock"
+                            onClick={() => openCountryStock(product)}
+                          >
+                            <Globe className="h-4 w-4" />
+                          </Button>
+                          <Button
+                            variant="outline"
+                            size="sm"
                             onClick={() => handleDelete(product._id)}
                             disabled={deleteMutation.isPending}
                           >
@@ -633,6 +718,72 @@ export default function Products() {
             )}
           </CardContent>
         </Card>
+
+        <Dialog open={detailsOpen} onOpenChange={setDetailsOpen}>
+          <DialogContent customWidth="560px" className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>{detailsProduct?.name}</DialogTitle>
+              <DialogDescription>
+                Countries where this product can be sold.
+              </DialogDescription>
+            </DialogHeader>
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Available for sale</h3>
+                <div className="flex flex-wrap gap-2">
+                  {COUNTRIES.filter(({ field }) => detailsProduct?.[field] !== false).map(({ label }) => (
+                    <Badge key={label}>{label}</Badge>
+                  ))}
+                  {COUNTRIES.every(({ field }) => detailsProduct?.[field] === false) && (
+                    <p className="text-sm text-gray-500">Not available in any country</p>
+                  )}
+                </div>
+              </div>
+              <div>
+                <h3 className="text-sm font-semibold text-gray-900 mb-3">Out of stock</h3>
+                <div className="flex flex-wrap gap-2">
+                  {COUNTRIES.filter(({ field }) => detailsProduct?.[field] === false).map(({ label }) => (
+                    <Badge key={label} variant="secondary">{label}</Badge>
+                  ))}
+                  {COUNTRIES.every(({ field }) => detailsProduct?.[field] !== false) && (
+                    <p className="text-sm text-gray-500">In stock in every country</p>
+                  )}
+                </div>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
+        <Dialog open={stockOpen} onOpenChange={setStockOpen}>
+          <DialogContent customWidth="560px" className="max-h-[90vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Country stock</DialogTitle>
+              <DialogDescription>
+                Choose the countries where {stockProduct?.name} can be bought. Unchecked countries are out of stock.
+              </DialogDescription>
+            </DialogHeader>
+            <form onSubmit={handleAvailabilitySubmit} className="space-y-4">
+              <div className="space-y-3">
+                {COUNTRIES.map(({ label, field }) => (
+                  <label key={field} className="flex items-center gap-3 text-sm text-gray-900">
+                    <Checkbox
+                      checked={countryChecks[field]}
+                      onCheckedChange={(checked) =>
+                        setCountryChecks((current) => ({ ...current, [field]: checked === true }))
+                      }
+                    />
+                    {label}
+                  </label>
+                ))}
+              </div>
+              <DialogFooter>
+                <Button type="submit" disabled={availabilityMutation.isPending}>
+                  {availabilityMutation.isPending ? "Saving..." : "Save"}
+                </Button>
+              </DialogFooter>
+            </form>
+          </DialogContent>
+        </Dialog>
 
         {/* Edit Dialog */}
         <Dialog open={!!editingProduct} onOpenChange={() => setEditingProduct(null)}>
